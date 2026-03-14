@@ -1,0 +1,2263 @@
+﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maximilian Warden | Musik</title>
+  <meta name="description" content="Scrollbare Musikseite mit Tracklisten, Cover-Art und optionalem dynamischen Spotify-Player für Maximilian Warden." />
+  <style>
+    :root {
+      --bg: #07080d;
+      --bg-soft: rgba(255,255,255,0.06);
+      --line: rgba(255,255,255,0.12);
+      --card: rgba(13, 16, 25, 0.82);
+      --text: #f5f7fb;
+      --muted: rgba(245,247,251,0.68);
+      --accent: #d8c18e;
+      --accent-soft: rgba(216, 193, 142, 0.18);
+      --shadow: 0 20px 90px rgba(0,0,0,0.45);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --max: 1440px;
+      --snap: mandatory;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background:
+        radial-gradient(circle at top left, rgba(157, 105, 255, 0.16), transparent 26%),
+        radial-gradient(circle at top right, rgba(62, 145, 255, 0.15), transparent 28%),
+        radial-gradient(circle at bottom center, rgba(216, 193, 142, 0.12), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden;
+    }
+    a { color: inherit; }
+    button, select {
+      font: inherit;
+    }
+    #app {
+      height: 100svh;
+      position: relative;
+      isolation: isolate;
+    }
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(circle at center, black 45%, transparent 100%);
+      opacity: 0.28;
+      z-index: 0;
+    }
+    .main {
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scroll-snap-type: y var(--snap);
+      scroll-behavior: smooth;
+      position: relative;
+      z-index: 1;
+    }
+    .main.locked {
+      overflow: hidden;
+    }
+    .section {
+      min-height: 100svh;
+      scroll-snap-align: start;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+    }
+    .shell {
+      width: min(var(--max), 100%);
+      margin-inline: auto;
+    }
+    .hero {
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-panel {
+      position: relative;
+      min-height: calc(100svh - 56px);
+      border: 1px solid var(--line);
+      border-radius: clamp(24px, 4vw, 40px);
+      overflow: hidden;
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,0.06), rgba(0,0,0,0.84)),
+        linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      box-shadow: var(--shadow);
+      display: grid;
+      place-items: center;
+      padding: clamp(24px, 5vw, 60px);
+    }
+    .hero-video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: linear-gradient(180deg, #f3f1ec, #ffffff);
+      opacity: 0.22;
+      filter: invert(1) contrast(1.1) saturate(0.9);
+      mix-blend-mode: screen;
+      transition: opacity 500ms ease;
+    }
+    .hero.playing .hero-video {
+      opacity: 0.96;
+    }
+    .hero-copy {
+      position: relative;
+      z-index: 1;
+      width: min(900px, 100%);
+      display: grid;
+      gap: 18px;
+      justify-items: center;
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(14px);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 10px 16px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 12px;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(42px, 9vw, 106px);
+      line-height: 0.92;
+      letter-spacing: -0.05em;
+      text-wrap: balance;
+    }
+    .hero-sub {
+      margin: 0;
+      max-width: 760px;
+      font-size: clamp(16px, 2vw, 22px);
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+    .btn {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 14px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform 200ms ease, background 200ms ease, border-color 200ms ease;
+      text-decoration: none;
+    }
+    .btn:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.10);
+      border-color: rgba(255,255,255,0.22);
+    }
+    .btn.primary {
+      background: linear-gradient(180deg, rgba(216,193,142,0.24), rgba(216,193,142,0.10));
+      border-color: rgba(216,193,142,0.45);
+    }
+    .hint {
+      font-size: 13px;
+      color: rgba(245,247,251,0.56);
+      margin-top: 6px;
+    }
+    .status-pill {
+      position: absolute;
+      left: 22px;
+      bottom: 22px;
+      z-index: 2;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(7, 8, 13, 0.66);
+      backdrop-filter: blur(18px);
+      color: var(--muted);
+      font-size: 13px;
+      max-width: min(440px, calc(100% - 44px));
+      text-align: left;
+    }
+
+    .release {
+      align-items: stretch;
+    }
+    .release-card {
+      width: min(var(--max), 100%);
+      min-height: calc(100svh - 56px);
+      display: grid;
+      grid-template-columns: minmax(280px, 420px) minmax(0, 1fr);
+      gap: clamp(22px, 3vw, 42px);
+      background: linear-gradient(180deg, rgba(13,16,25,0.80), rgba(10,12,19,0.88));
+      border: 1px solid var(--line);
+      border-radius: clamp(26px, 4vw, 38px);
+      padding: clamp(20px, 3vw, 34px);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+    .release-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at top right, rgba(216,193,142,0.10), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(255,255,255,0.04), transparent 24%);
+      pointer-events: none;
+    }
+    .cover-stack {
+      position: sticky;
+      top: 28px;
+      display: grid;
+      align-content: start;
+      gap: 28px;
+      z-index: 1;
+    }
+    .cover-frame {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      border-radius: 28px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,0.08), rgba(255,255,255,0.02)),
+        linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.02));
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 18px 60px rgba(0,0,0,0.36);
+      display: grid;
+      place-items: center;
+    }
+    .cover-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 500ms ease;
+    }
+    .release-card:hover .cover-frame img {
+      transform: scale(1.02);
+    }
+    .cover-fallback {
+      padding: 28px;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      align-content: center;
+      text-align: center;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.16), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(216,193,142,0.18), transparent 26%),
+        linear-gradient(135deg, rgba(22,28,43,1), rgba(8,10,16,1));
+      color: rgba(245,247,251,0.88);
+    }
+    .cover-fallback strong {
+      font-size: clamp(24px, 4vw, 34px);
+      line-height: 1.02;
+      letter-spacing: -0.04em;
+    }
+    .cover-fallback span {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 8px;
+    }
+    .mini-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .mini-meta span {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+    .content {
+      position: relative;
+      z-index: 1;
+      min-width: 0;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 20px;
+    }
+    .content-head {
+      display: grid;
+      gap: 14px;
+    }
+    .release-title {
+      margin: 0;
+      font-size: clamp(32px, 4.8vw, 68px);
+      line-height: 0.94;
+      letter-spacing: -0.05em;
+      max-width: 16ch;
+      text-wrap: balance;
+    }
+    .release-sub {
+      margin: 0;
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 72ch;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .meta-item {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      border-radius: 18px;
+      padding: 14px 16px;
+      min-height: 82px;
+      display: grid;
+      align-content: start;
+      gap: 6px;
+    }
+    .meta-item small {
+      color: rgba(245,247,251,0.5);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 11px;
+    }
+    .meta-item strong {
+      font-size: 15px;
+      line-height: 1.35;
+    }
+    .tracks {
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.035);
+      border-radius: 22px;
+      padding: 20px 20px 18px;
+      overflow: hidden;
+    }
+    .tracks-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .tracks-head h3 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: 0.02em;
+    }
+    .tracks-head span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .track-list {
+      margin: 0;
+      padding-left: 1.4rem;
+      columns: 2;
+      column-gap: 30px;
+      overflow: auto;
+      scrollbar-width: thin;
+    }
+    .track-list li {
+      break-inside: avoid;
+      margin-bottom: 10px;
+      color: rgba(245,247,251,0.9);
+      line-height: 1.5;
+      padding-right: 18px;
+    }
+
+    .timeline {
+      position: fixed;
+      top: 22px;
+      left: 22px;
+      z-index: 5;
+      display: grid;
+      gap: 10px;
+      max-width: 180px;
+    }
+    .timeline-chip {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(7,8,13,0.68);
+      backdrop-filter: blur(18px);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .timeline-year {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .spotify-dock {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      z-index: 6;
+      width: min(420px, calc(100vw - 44px));
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(7, 8, 13, 0.78);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .spotify-head {
+      padding: 16px 18px 10px;
+      display: grid;
+      gap: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+    .spotify-head-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .spotify-head strong {
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: rgba(245,247,251,0.82);
+    }
+    .spotify-current {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .spotify-select {
+      width: 100%;
+      appearance: none;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: var(--text);
+      background: rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 12px 14px;
+      outline: none;
+    }
+    .spotify-body {
+      padding: 12px;
+    }
+    .spotify-empty {
+      min-height: 152px;
+      border-radius: 16px;
+      border: 1px dashed rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.03);
+      display: grid;
+      place-items: center;
+      text-align: left;
+      padding: 18px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+    .spotify-frame {
+      width: 100%;
+      height: 352px;
+      border: 0;
+      border-radius: 16px;
+      display: none;
+      background: #111;
+    }
+    
+    .spotify-dock.minimized .spotify-current,
+    .spotify-dock.minimized .spotify-select,
+    .spotify-dock.minimized .spotify-body {
+      display: none;
+    }
+
+    .release-anchor {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--line);
+      color: rgba(245,247,251,0.58);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    @media (max-width: 1080px) {
+      html, body {
+        overflow: auto;
+      }
+      .main {
+        overflow-y: visible;
+        scroll-snap-type: none;
+      }
+      .section {
+        min-height: auto;
+      }
+      .hero-panel, .release-card {
+        min-height: auto;
+      }
+      .release-card {
+        grid-template-columns: 1fr;
+      }
+      .cover-frame {
+        position: relative;
+        top: 0;
+        max-width: 520px;
+        margin-inline: auto;
+      }
+      .meta-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .track-list {
+        columns: 1;
+        max-height: none;
+      }
+      .timeline {
+        position: sticky;
+        top: 12px;
+        left: auto;
+        right: auto;
+        padding-inline: 28px;
+        margin-top: 14px;
+        max-width: none;
+      }
+      .spotify-dock {
+        position: static;
+        width: min(var(--max), calc(100% - 56px));
+        margin: 0 auto 28px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .section {
+        padding: 16px;
+      }
+      .hero-panel, .release-card {
+        border-radius: 24px;
+      }
+      .meta-grid {
+        grid-template-columns: 1fr;
+      }
+      .release-title {
+        max-width: none;
+      }
+      .status-pill {
+        left: 14px;
+        right: 14px;
+        bottom: 14px;
+        max-width: none;
+      }
+      .hero-actions {
+        flex-direction: column;
+        width: min(100%, 360px);
+      }
+      .btn {
+        width: 100%;
+      }
+    }
+  
+/* Injected Styles */
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes overlayIn{from{opacity:0}to{opacity:1}}
+@keyframes b1{0%,100%{height:6px}50%{height:20px}}
+@keyframes b2{0%,100%{height:14px}50%{height:5px}}
+@keyframes b3{0%,100%{height:18px}30%{height:7px}70%{height:22px}}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:1000;align-items:center;justify-content:center;padding:20px;animation:overlayIn .25s ease;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:#0c0c0c;border:0.5px solid rgba(255,255,255,.13);border-radius:20px;max-width:620px;width:100%;max-height:82vh;display:flex;flex-direction:column;animation:fadeIn .3s ease;position:relative;overflow:hidden;}
+.modal-scroll{overflow-y:auto;padding:0 28px 28px;scrollbar-width:thin;scrollbar-color:rgba(240,165,0,.3) transparent;}
+.modal-scroll::-webkit-scrollbar{width:4px;}
+.modal-scroll::-webkit-scrollbar-thumb{background:rgba(240,165,0,.3);border-radius:4px;}
+.modal-section{margin-bottom:26px;}
+.modal-section-title{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:#f0a500;font-weight:500;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.modal-section-title::after{content:'';flex:1;height:0.5px;background:rgba(255,255,255,.08);}
+.modal-section p{font-size:13.5px;color:rgba(255,255,255,.55);line-height:1.75;margin:0 0 8px;}
+.modal-section p:last-child{margin:0;}
+.modal-section a{color:rgba(240,165,0,.75);text-decoration:none;}
+.modal-section a:hover{color:#f0a500;}
+.tag{display:inline-block;background:rgba(240,165,0,.1);color:#f0a500;border:0.5px solid rgba(240,165,0,.25);border-radius:6px;font-size:11px;padding:3px 9px;margin:3px 3px 3px 0;letter-spacing:.3px;}
+.note-box{background:rgba(255,255,255,.04);border:0.5px solid rgba(255,255,255,.09);border-left:2px solid rgba(240,165,0,.5);border-radius:0 8px 8px 0;padding:12px 14px;margin:10px 0;}
+.note-box p{font-size:12.5px;color:rgba(255,255,255,.45);margin:0;line-height:1.65;}
+.legal-sidebar-btns{position:fixed;left:12px;bottom:80px;z-index:900;display:flex;flex-direction:column;gap:7px;}
+.legal-sidebar-btn{background:rgba(13,16,25,0.82);border:1px solid rgba(255,255,255,0.12);color:rgba(245,247,251,0.6);border-radius:999px;padding:7px 13px;font-size:11.5px;cursor:pointer;font-family:inherit;letter-spacing:0.04em;transition:background 200ms,color 200ms,border-color 200ms;text-align:left;white-space:nowrap;backdrop-filter:blur(12px);}
+.legal-sidebar-btn:hover{background:rgba(216,193,142,0.13);border-color:rgba(216,193,142,0.35);color:rgba(245,247,251,0.9);}
+
+
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes b1{0%,100%{height:6px}50%{height:20px}}
+@keyframes b2{0%,100%{height:14px}50%{height:5px}}
+@keyframes b3{0%,100%{height:18px}30%{height:7px}70%{height:22px}}
+@keyframes b4{0%,100%{height:9px}45%{height:19px}}
+@keyframes b5{0%,100%{height:5px}55%{height:15px}}
+.sp{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.sp.open{max-height:500px}
+button:hover{opacity:.85}
+
+
+</style>
+</head>
+<body>
+  <div id="app">
+    <div class="noise" aria-hidden="true"></div>
+
+    <aside class="timeline" aria-label="Zeitraum">
+      <div class="timeline-chip"><span class="timeline-year">2024</span> bis <span class="timeline-year">2026</span></div>
+      <div class="timeline-chip" id="activeYearChip">Aktuell: Intro</div>
+      <div class="timeline-chip" id="releaseCountChip">28 Releases</div>
+    </aside>
+
+    <div class="legal-sidebar-btns">
+      <button class="legal-sidebar-btn" onclick="openModal('impressum')" aria-label="Impressum öffnen">§ Impressum</button>
+      <button class="legal-sidebar-btn" onclick="openModal('datenschutz')" aria-label="Datenschutz öffnen">🔒 Datenschutz</button>
+    </div>
+
+    <main class="main" id="main">
+      <section class="section hero" id="intro">
+        <div class="shell">
+          <div class="hero-panel">
+            <video
+              class="hero-video"
+              id="scrollStopVideo"
+              muted
+              playsinline
+              preload="metadata"
+              aria-label="Scroll-Stop-Animation"
+            >
+              <source src="./assets/scroll-stop-animation.mp4" type="video/mp4" />
+            </video>
+
+            <div class="hero-copy" id="heroCopy" style="opacity: 0; pointer-events: none; transition: opacity 500ms ease; position: absolute; bottom: 40px; justify-items: center;">
+              <div class="hero-actions">
+                <button class="btn primary" id="startExperience">Animation wiederholen</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div id="releases"></div>
+    </main>
+
+    <aside class="spotify-dock" aria-label="Spotify Player">
+      <div class="spotify-head">
+        <div class="spotify-head-top">
+          <strong>Spotify Dock</strong>
+          <button class="timeline-chip" id="spotifyToggle" style="padding:6px 10px; cursor:pointer;" aria-label="Spotify minimieren/maximieren">Minimieren</button>
+        </div>
+        <div class="spotify-current" id="spotifyCurrent">
+          Player bereit. Sobald du Spotify-IDs einträgst, wechselt der Player automatisch pro Release.
+        </div>
+        <select class="spotify-select" id="spotifySelect" aria-label="Release wählen"></select>
+      </div>
+      <div class="spotify-body">
+        <div class="spotify-empty" id="spotifyEmpty">
+          Für dieses Release ist noch keine Spotify-ID hinterlegt. Trage im Objekt
+          <strong>SPOTIFY_IDS</strong> in der <strong>index.html</strong> Album-IDs,
+          Spotify-URIs oder Spotify-Links ein. Menschen lieben halbfertige Inputs. Die Seite kommt damit klar.
+        </div>
+        <iframe
+          class="spotify-frame"
+          id="spotifyFrame"
+          loading="lazy"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          title="Spotify Player"
+        ></iframe>
+      </div>
+    </aside>
+  
+<!-- OVERLAYS -->
+<!-- IMPRESSUM MODAL -->
+
+<div id="modal-impressum" class="modal-overlay" onclick="closeOnOverlay(event,'impressum')">
+  <div class="modal-box">
+    <div style="padding:24px 28px 18px;border-bottom:0.5px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:14px;flex-shrink:0;">
+      <div style="animation:spin 7s linear infinite;flex-shrink:0;">
+        <svg viewBox="0 0 44 44" width="36" height="36"><circle cx="22" cy="22" r="21" fill="#1c1c1c"/><circle cx="22" cy="22" r="10" fill="#f0a500"/><circle cx="22" cy="22" r="2.5" fill="#0c0c0c"/></svg>
+      </div>
+      <div style="flex:1;">
+        <p style="font-size:18px;font-weight:500;color:#fff;margin:0 0 2px;font-family:var(--font-sans);">Impressum</p>
+        <p style="font-size:11px;color:rgba(255,255,255,.3);margin:0;font-family:var(--font-sans);letter-spacing:.8px;text-transform:uppercase;">Angaben gemäß § 5 TMG</p>
+      </div>
+      <button onclick="closeModal('impressum')" style="background:rgba(255,255,255,.07);border:0.5px solid rgba(255,255,255,.1);border-radius:8px;color:rgba(255,255,255,.5);font-size:18px;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-sans);">✕</button>
+    </div>
+    <div class="modal-scroll" style="padding-top:24px;">
+
+      <div class="modal-section">
+        <div class="modal-section-title">Verantwortlicher</div>
+        <p style="font-size:14.5px;font-weight:500;color:#fff;">Maximilian Warden</p>
+        <p>Onnhamm 9<br>26419 Schortens<br>Deutschland</p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Kontakt</div>
+        <p>E-Mail: <a href="mailto:kontakt@maximilianwarden.de">kontakt@maximilianwarden.de</a></p>
+        <div class="note-box"><p>Eine Kontaktaufnahme per elektronischer Post ist möglich. Eine Pflicht zur Angabe einer Telefonnummer gemäß § 5 Abs. 1 Nr. 2 TMG besteht für Anbieter, die keine geschäftsmäßigen Dienste erbringen, nach herrschender Rechtsauffassung nicht.</p></div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Inhalt des Angebots</div>
+        <p>Diese Website dient ausschließlich der künstlerischen Selbstdarstellung und der Präsentation von Musikwerken. Es werden keinerlei Waren oder Dienstleistungen entgeltlich angeboten. Das Angebot ist nicht auf Gewinnerzielung ausgerichtet und begründet keine Pflicht zur Eintragung in ein Handelsregister.</p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Haftung für Inhalte</div>
+        <p>Die Inhalte dieser Website wurden mit größtmöglicher Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte kann jedoch keine Gewähr übernommen werden. Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich.</p>
+        <p>Nach §§ 8 bis 10 TMG sind wir als Diensteanbieter hingegen nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.</p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Haftung für Links</div>
+        <p>Diese Website enthält eingebettete Inhalte des Diensteanbieters Spotify AB, Regeringsgatan 19, SE-111 53 Stockholm, Schweden. Für den Inhalt dieser eingebetteten Dienste ist der jeweilige Anbieter verantwortlich. Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen werden derartige Inhalte umgehend entfernt.</p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Urheberrecht</div>
+        <p>Die durch den Seitenbetreiber erstellten Inhalte und Werke auf dieser Website unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers. Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet.</p>
+        <p>Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden derartige Inhalte umgehend entfernt.</p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Streitbeilegung</div>
+        <p>Die Europäische Kommission stellt unter <a href="https://ec.europa.eu/consumers/odr/" target="_blank">ec.europa.eu/consumers/odr</a> eine Plattform zur Online-Streitbeilegung (OS) bereit. Zur Teilnahme an einem Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle sind wir nicht verpflichtet und nicht bereit, da es sich um kein gewerbliches Angebot handelt.</p>
+      </div>
+
+      <p style="font-size:11px;color:rgba(255,255,255,.2);text-align:right;margin-top:8px;">Stand: März 2026</p>
+    </div>
+  </div>
+</div>
+
+<!-- DATENSCHUTZ MODAL -->
+<div id="modal-datenschutz" class="modal-overlay" onclick="closeOnOverlay(event,'datenschutz')">
+  <div class="modal-box">
+    <div style="padding:24px 28px 18px;border-bottom:0.5px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:14px;flex-shrink:0;">
+      <div style="animation:spin 7s linear infinite;flex-shrink:0;">
+        <svg viewBox="0 0 44 44" width="36" height="36"><circle cx="22" cy="22" r="21" fill="#1c1c1c"/><circle cx="22" cy="22" r="10" fill="#f0a500"/><circle cx="22" cy="22" r="2.5" fill="#0c0c0c"/></svg>
+      </div>
+      <div style="flex:1;">
+        <p style="font-size:18px;font-weight:500;color:#fff;margin:0 0 2px;font-family:var(--font-sans);">Datenschutzerklärung</p>
+        <p style="font-size:11px;color:rgba(255,255,255,.3);margin:0;font-family:var(--font-sans);letter-spacing:.8px;text-transform:uppercase;">DSGVO · Art. 13 &amp; 14</p>
+      </div>
+      <button onclick="closeModal('datenschutz')" style="background:rgba(255,255,255,.07);border:0.5px solid rgba(255,255,255,.1);border-radius:8px;color:rgba(255,255,255,.5);font-size:18px;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-sans);">✕</button>
+    </div>
+    <div class="modal-scroll" style="padding-top:24px;">
+
+      <div class="modal-section">
+        <div class="modal-section-title">Verantwortlicher (Art. 4 Nr. 7 DSGVO)</div>
+        <p style="font-size:14px;font-weight:500;color:#fff;">Maximilian Warden</p>
+        <p>Onnhamm 9, 26419 Schortens · E-Mail: <a href="mailto:cascus@gmx.de">cascus@gmx.de</a></p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Grundsätze der Datenverarbeitung</div>
+        <p>Personenbezogene Daten werden ausschließlich im Rahmen der geltenden datenschutzrechtlichen Bestimmungen verarbeitet. Rechtsgrundlage für die Datenverarbeitung bilden insbesondere Art. 6 Abs. 1 lit. a DSGVO (Einwilligung), Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung) sowie Art. 6 Abs. 1 lit. f DSGVO (berechtigte Interessen).</p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Server-Logfiles</div>
+        <p>Der Hostingdienstleister erhebt und speichert automatisch Informationen in sogenannten Server-Logfiles, die Ihr Browser automatisch übermittelt. Dies umfasst: Browsertyp und -version, verwendetes Betriebssystem, Referrer-URL, Hostname des zugreifenden Rechners, Uhrzeit der Serveranfrage und IP-Adresse.</p>
+        <p>Die Rechtsgrundlage für diese Verarbeitung bildet Art. 6 Abs. 1 lit. f DSGVO. Das berechtigte Interesse besteht in der technisch fehlerfreien Darstellung und Optimierung der Website. Eine Zusammenführung mit anderen Datenquellen wird nicht vorgenommen. Die Daten werden nach 7 Tagen gelöscht, sofern keine konkrete Anhaltspunkte für eine rechtswidrige Nutzung vorliegen.</p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Cookies &amp; Einwilligungsverwaltung</div>
+        <p>Diese Website setzt technisch notwendige Cookies ein, die für den Betrieb der Website unerlässlich sind und keiner Einwilligung bedürfen. Darüber hinaus werden optionale Cookies (Analyse, Marketing) ausschließlich nach vorheriger ausdrücklicher Einwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO gesetzt.</p>
+        <p>Die erteilte Einwilligung kann jederzeit mit Wirkung für die Zukunft widerrufen werden. Die Rechtmäßigkeit der bis zum Widerruf erfolgten Verarbeitung bleibt hiervon unberührt (Art. 7 Abs. 3 DSGVO).</p>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;">
+          <span class="tag">Technisch notwendig (immer aktiv)</span>
+          <span class="tag">Analyse (opt-in)</span>
+          <span class="tag">Marketing (opt-in)</span>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Eingebetteter Spotify-Player (Drittanbieter)</div>
+        <p>Diese Website bindet den Musik-Streaming-Dienst Spotify über die offizielle Embed-Funktion ein. Anbieter ist die Spotify AB, Regeringsgatan 19, SE-111 53 Stockholm, Schweden.</p>
+        <p>Beim Aufruf einer Seite mit eingebettetem Spotify-Player wird eine Verbindung zu den Servern von Spotify hergestellt. Dabei werden Ihre IP-Adresse sowie ggf. Nutzungsdaten an Spotify übermittelt. Wenn Sie in Ihrem Spotify-Konto eingeloggt sind, kann Spotify Ihr Surfverhalten direkt Ihrem persönlichen Konto zuordnen.</p>
+        <div class="note-box"><p>Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO bei erteilter Einwilligung; Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an künstlerischer Präsentation). Eine Datenübermittlung in Drittstaaten (u.a. USA) ist möglich. Spotify ist unter dem EU-US Data Privacy Framework zertifiziert (Angemessenheitsbeschluss der Kommission vom 10.07.2023).</p></div>
+        <p>Informationen zum Datenschutz bei Spotify: <a href="https://www.spotify.com/de/legal/privacy-policy/" target="_blank">spotify.com/de/legal/privacy-policy</a></p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Analyse-Dienste (bei Einwilligung)</div>
+        <p>Sofern Sie der Nutzung von Analyse-Cookies zugestimmt haben, können Dienste wie Google Analytics 4 oder Matomo eingesetzt werden. Die Datenverarbeitung erfolgt ausschließlich auf Grundlage Ihrer Einwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO. Die IP-Adressen werden anonymisiert, bevor sie gespeichert werden (IP-Masking).</p>
+        <p>Eine Übermittlung in Drittstaaten erfolgt nur unter Sicherstellung eines angemessenen Schutzniveaus gem. Art. 44 ff. DSGVO.</p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Betroffenenrechte (Art. 15–22 DSGVO)</div>
+        <p>Sie haben gegenüber dem Verantwortlichen folgende Rechte hinsichtlich Ihrer personenbezogenen Daten:</p>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin:8px 0;">
+          <span class="tag">Auskunft (Art. 15)</span>
+          <span class="tag">Berichtigung (Art. 16)</span>
+          <span class="tag">Löschung (Art. 17)</span>
+          <span class="tag">Einschränkung (Art. 18)</span>
+          <span class="tag">Datenübertragbarkeit (Art. 20)</span>
+          <span class="tag">Widerspruch (Art. 21)</span>
+          <span class="tag">Widerruf (Art. 7 Abs. 3)</span>
+        </div>
+        <p>Zur Geltendmachung Ihrer Rechte wenden Sie sich an die oben genannte Kontaktadresse. Darüber hinaus steht Ihnen ein Beschwerderecht bei der zuständigen Datenschutz-Aufsichtsbehörde zu.</p>
+        <div class="note-box"><p>Zuständige Aufsichtsbehörde: Landesbeauftragte für Datenschutz Niedersachsen, Prinzenstraße 5, 30159 Hannover · <a href="https://www.lfd.niedersachsen.de" target="_blank">lfd.niedersachsen.de</a></p></div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Datensicherheit</div>
+        <p>Diese Website nutzt aus Sicherheitsgründen und zum Schutz der Übertragung vertraulicher Inhalte eine SSL- bzw. TLS-Verschlüsselung. Eine verschlüsselte Verbindung erkennen Sie daran, dass die Adresszeile des Browsers von „http://" auf „https://" wechselt und an dem Schloss-Symbol in Ihrer Browserzeile. Wenn die SSL- bzw. TLS-Verschlüsselung aktiviert ist, können die Daten, die Sie an uns übermitteln, nicht von Dritten mitgelesen werden.</p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Aktualität dieser Erklärung</div>
+        <p>Diese Datenschutzerklärung hat den Stand März 2026 und wird bei Änderungen der rechtlichen Lage oder der auf dieser Website eingesetzten Dienste entsprechend aktualisiert. Es gilt jeweils die zum Zeitpunkt Ihres Besuchs aktuelle Fassung.</p>
+      </div>
+
+      <p style="font-size:11px;color:rgba(255,255,255,.2);text-align:right;margin-top:8px;">Stand: März 2026</p>
+    </div>
+  </div>
+</div>
+
+
+
+
+<div id="cookieOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:20px;z-index:2000;transition:opacity .5s ease;flex-direction:column;backdrop-filter:blur(4px);">
+<div id="cw" style="max-width:500px;width:100%;">
+
+<div style="background:#0c0c0c;border:0.5px solid rgba(255,255,255,0.11);border-radius:18px;padding:26px 28px;color:#f0f0f0;font-family:var(--font-sans);position:relative;overflow:hidden;">
+
+  <!-- Groove decoration -->
+  <div style="position:absolute;top:-40px;right:-40px;width:140px;height:140px;border-radius:50%;border:0.5px solid rgba(240,165,0,.08);pointer-events:none;"></div>
+  <div style="position:absolute;top:-20px;right:-20px;width:90px;height:90px;border-radius:50%;border:0.5px solid rgba(240,165,0,.06);pointer-events:none;"></div>
+
+  <!-- Header -->
+  <div style="display:flex;align-items:center;gap:18px;margin-bottom:18px;">
+    <div style="flex-shrink:0;animation:spin 5s linear infinite;">
+      <svg viewBox="0 0 60 60" width="58" height="58">
+        <circle cx="30" cy="30" r="29" fill="#1c1c1c"/>
+        <circle cx="30" cy="30" r="27" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="1.2"/>
+        <circle cx="30" cy="30" r="23" fill="#141414"/>
+        <circle cx="30" cy="30" r="21" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+        <circle cx="30" cy="30" r="17" fill="#1c1c1c"/>
+        <circle cx="30" cy="30" r="15" fill="none" stroke="rgba(255,255,255,.04)" stroke-width="1"/>
+        <circle cx="30" cy="30" r="12" fill="#f0a500"/>
+        <circle cx="30" cy="30" r="10" fill="none" stroke="rgba(255,255,255,.18)" stroke-width=".5"/>
+        <text x="30" y="27" text-anchor="middle" font-size="3.2" fill="rgba(0,0,0,.6)" font-family="sans-serif" font-weight="bold" letter-spacing=".5">MELODIA</text>
+        <text x="30" y="32" text-anchor="middle" font-size="2.6" fill="rgba(0,0,0,.5)" font-family="sans-serif">RECORDS</text>
+        <circle cx="30" cy="30" r="3.2" fill="#0c0c0c"/>
+      </svg>
+    </div>
+    <div style="flex:1;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:5px;">
+        <span style="font-size:17px;font-weight:500;color:#fff;letter-spacing:-.4px;">Bevor die Musik startet</span>
+        <div style="display:flex;align-items:flex-end;gap:2.5px;height:22px;">
+          <div style="width:3px;background:#f0a500;border-radius:2px;animation:b1 1.1s ease-in-out infinite;"></div>
+          <div style="width:3px;background:#f0a500;border-radius:2px;animation:b2 .85s ease-in-out infinite;"></div>
+          <div style="width:3px;background:#f0a500;border-radius:2px;animation:b3 1.3s ease-in-out infinite;"></div>
+          <div style="width:3px;background:#f0a500;border-radius:2px;animation:b4 .95s ease-in-out infinite;"></div>
+          <div style="width:3px;background:#f0a500;border-radius:2px;animation:b5 .75s ease-in-out infinite;"></div>
+        </div>
+      </div>
+      <p style="font-size:11.5px;color:rgba(255,255,255,.35);margin:0;letter-spacing:.8px;text-transform:uppercase;">Cookie-Einstellungen · DSGVO-konform</p>
+    </div>
+  </div>
+
+  <!-- Description -->
+  <p style="font-size:13.5px;color:rgba(255,255,255,.6);line-height:1.65;margin:0 0 20px;">
+    Wir verwenden Cookies, um dir das beste Klangerlebnis zu bieten — von der reibungslosen Wiedergabe bis hin zu personalisierten Playlist-Empfehlungen. Du kannst jederzeit selbst entscheiden, welche Cookies du zulässt.
+  </p>
+
+  <!-- Expandable settings -->
+  <div id="sp" class="sp" style="margin-bottom:0;">
+    <div style="border:0.5px solid rgba(255,255,255,.1);border-radius:12px;overflow:hidden;margin-bottom:20px;">
+
+      <!-- Notwendig -->
+      <div style="padding:14px 16px;border-bottom:0.5px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+        <div>
+          <div style="font-size:13px;font-weight:500;color:#fff;margin-bottom:3px;">Notwendige Cookies</div>
+          <div style="font-size:11.5px;color:rgba(255,255,255,.4);line-height:1.5;">Erforderlich für Grundfunktionen wie Navigation und Sicherheit. Lassen sich nicht deaktivieren.</div>
+        </div>
+        <div style="flex-shrink:0;background:#f0a500;border-radius:20px;padding:3px 10px;font-size:11px;color:#0c0c0c;font-weight:500;margin-top:1px;white-space:nowrap;">Immer aktiv</div>
+      </div>
+
+      <!-- Statistiken -->
+      <div style="padding:14px 16px;border-bottom:0.5px solid rgba(255,255,255,.07);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:500;color:#fff;margin-bottom:3px;">Analyse & Statistiken</div>
+          <div style="font-size:11.5px;color:rgba(255,255,255,.4);line-height:1.5;">Helfen uns zu verstehen, wie Besucher unsere Seite nutzen (z. B. Google Analytics, Matomo).</div>
+        </div>
+        <div onclick="tog('a')" id="tr-a" style="flex-shrink:0;width:42px;height:24px;background:rgba(255,255,255,.15);border-radius:20px;position:relative;cursor:pointer;transition:background .2s;margin-top:2px;">
+          <div id="th-a" style="position:absolute;top:4px;left:4px;width:16px;height:16px;background:#fff;border-radius:50%;transition:left .2s;"></div>
+        </div>
+      </div>
+
+      <!-- Marketing -->
+      <div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:500;color:#fff;margin-bottom:3px;">Marketing & Personalisierung</div>
+          <div style="font-size:11.5px;color:rgba(255,255,255,.4);line-height:1.5;">Ermöglichen personalisierte Musik­empfehlungen und relevante Werbung von Drittanbietern.</div>
+        </div>
+        <div onclick="tog('m')" id="tr-m" style="flex-shrink:0;width:42px;height:24px;background:rgba(255,255,255,.15);border-radius:20px;position:relative;cursor:pointer;transition:background .2s;margin-top:2px;">
+          <div id="th-m" style="position:absolute;top:4px;left:4px;width:16px;height:16px;background:#fff;border-radius:50%;transition:left .2s;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Buttons -->
+  <div style="display:flex;gap:10px;margin-bottom:12px;">
+    <button onclick="accept('all')" style="flex:1;background:#f0a500;color:#0c0c0c;border:none;border-radius:10px;padding:12px 8px;font-size:13.5px;font-weight:500;cursor:pointer;font-family:var(--font-sans);letter-spacing:-.1px;">Alle akzeptieren</button>
+    <button onclick="accept('necessary')" style="flex:1;background:transparent;color:rgba(255,255,255,.75);border:0.5px solid rgba(255,255,255,.22);border-radius:10px;padding:12px 8px;font-size:13.5px;cursor:pointer;font-family:var(--font-sans);">Nur notwendige</button>
+  </div>
+
+  <!-- Settings row -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+    <button id="sb" onclick="toggleSettings()" style="background:transparent;color:rgba(255,255,255,.4);border:none;font-size:12px;cursor:pointer;padding:0;font-family:var(--font-sans);text-decoration:underline;text-underline-offset:3px;">Einstellungen anpassen</button>
+    <button id="svb" onclick="accept('custom')" style="display:none;background:transparent;color:#f0a500;border:none;font-size:12px;cursor:pointer;padding:0;font-family:var(--font-sans);text-decoration:underline;text-underline-offset:3px;">Auswahl speichern</button>
+  </div>
+
+  <!-- Legal footer -->
+  <div style="border-top:0.5px solid rgba(255,255,255,.08);padding-top:13px;display:flex;gap:0;flex-wrap:wrap;">
+    <a href="#" onclick="event.preventDefault();openModal('datenschutz')" style="font-size:11.5px;color:rgba(255,255,255,.3);text-decoration:none;margin-right:16px;">Datenschutzerklärung</a>
+    <a href="#" onclick="event.preventDefault();openModal('impressum')" style="font-size:11.5px;color:rgba(255,255,255,.3);text-decoration:none;margin-right:16px;">Impressum</a>
+    <a href="#" style="font-size:11.5px;color:rgba(255,255,255,.3);text-decoration:none;">Cookie-Richtlinie</a>
+  </div>
+
+</div>
+</div>
+</div>
+
+
+
+
+</div>
+
+  <script>
+    const releases = [
+  {
+    "title": "Rhymes and Reason",
+    "format": "Album",
+    "trackCount": 15,
+    "upload": "11. März 2024",
+    "preorder": "11. März 2024",
+    "release": "20. März 2024",
+    "releaseISO": "2024-03-20",
+    "upc": "198467522163",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "A Sorrow Sown",
+      "A Glass too Clear to Break",
+      "A Sun behind the Shadows",
+      "Beneath These Skies",
+      "Endless Love",
+      "Enigmatic Entity",
+      "Explosive Energy",
+      "I know, I know, I do not know!",
+      "Let's Dance Tonight",
+      "Pulsar",
+      "Stay",
+      "Supernatural",
+      "The Carriage",
+      "The Mind of the Machine",
+      "Aristotle Full Throttle"
+    ],
+    "cover": "rhymes.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Klangkaskaden",
+    "format": "Album",
+    "trackCount": 26,
+    "upload": "11. März 2024",
+    "preorder": "11. März 2024",
+    "release": "20. März 2024",
+    "releaseISO": "2024-03-20",
+    "upc": "198467541430",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "Mr. Zerfetzulon",
+      "Seele zu verkaufen",
+      "Alles was ich seh",
+      "¡Ya Basta!",
+      "520",
+      "Das Loch",
+      "Der Fern Seher",
+      "Der General",
+      "Der Pudding-Pinguin",
+      "Dieses Herz aus Glas",
+      "Donuts werden siegen!",
+      "Ein Cortado im Hals",
+      "Ein Steak aus dem Drucker",
+      "Gern, gerner, Werner!",
+      "Gib ihn her!",
+      "Hahn",
+      "Hinter dem Ball",
+      "Immer wenn ich schrei...",
+      "Indiana lohnts?",
+      "Lullematsch",
+      "Nie zu alt zum Überweisen",
+      "Pina Colada Unlimited",
+      "Präsente",
+      "Schnitzel",
+      "Uwe",
+      "Ruhe!"
+    ],
+    "cover": "klangkaskaden.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Limbic System Lullabies: Cradle Songs for the Amygdala",
+    "format": "Album",
+    "trackCount": 15,
+    "upload": "18. März 2024",
+    "preorder": "18. März 2024",
+    "release": "24. März 2024",
+    "releaseISO": "2024-03-24",
+    "upc": "198468285005",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "Stronger",
+      "This Love",
+      "What's his Face?",
+      "Yeastbound",
+      "Beating Heart",
+      "Cacophony",
+      "Chaotic Nurture",
+      "Falling",
+      "Illusions",
+      "Like an Angel",
+      "Lost in a Smile",
+      "Lost in a Thought",
+      "Prodigy",
+      "Or",
+      "Perfect"
+    ],
+    "cover": "limbic.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Ode an die Freude (und andere Gefühlszustände)",
+    "format": "Album",
+    "trackCount": 35,
+    "upload": "25. März 2024",
+    "preorder": null,
+    "release": "25. März 2024",
+    "releaseISO": "2024-03-25",
+    "upc": "198469150340",
+    "distribution": "24 Plattformen/Stores (inkl. Snapchat)",
+    "tracks": [
+      "Das Leben",
+      "Die Legende der weißen Mütze (Don Quijote)",
+      "Die Legende der weißen Mütze 2 (Don Quijote)",
+      "Äggos-Schmeggos",
+      "Cortado Man",
+      "Ein Fest",
+      "Der analoge Widerstand",
+      "Der Irre auf Bahn Eins",
+      "Der Mann der alles kann",
+      "Die Insel des Lebens",
+      "Echo der Zeit",
+      "Ein wunderschöner Tag",
+      "Erich",
+      "Es reicht (nicht mehr)",
+      "Für nen Zehner",
+      "Gib nicht auf, mein Pinguin",
+      "Gut ist Gut genug!",
+      "Hundekinderzeit",
+      "Ist wer da ?",
+      "Kino",
+      "Knurrhahn",
+      "Lottokönig",
+      "Der Mann aus Friesland",
+      "Mallorca mein Garten der Sonne",
+      "Mein Herz gehört Mallorca",
+      "Mensch sein",
+      "Pinguin Power!",
+      "Donut-Pinguin-Song",
+      "Sonnenbäcker",
+      "Traum",
+      "Dumm",
+      "Der alte Mann kann es",
+      "Zehn vor Zehn",
+      "Taverna",
+      "Hotel Club Titan"
+    ],
+    "cover": "ode.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Data-Driven Dreams",
+    "format": "Album",
+    "trackCount": 20,
+    "upload": "25. April 2024",
+    "preorder": "25. April 2024",
+    "release": "4. Mai 2024",
+    "releaseISO": "2024-05-04",
+    "upc": "198475411701",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "Hidden Minds",
+      "Misty Veiled Sunrise",
+      "Serendipitist",
+      "Socratic",
+      "Susurrus",
+      "Theater of the Mind",
+      "Too Late",
+      "Gratification",
+      "Felicific!",
+      "Dusty ol' Heart",
+      "Dreamer",
+      "Diﬃcult Times",
+      "Braggadocio",
+      "Auxiliary",
+      "Aplomb!",
+      "A Withering Rose",
+      "A River catching Flames",
+      "A Life",
+      "A Heart so Cold",
+      "Ultracrepidarian"
+    ],
+    "cover": "data.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Unser Herz ist rund!",
+    "format": "Single",
+    "trackCount": 1,
+    "upload": "8. Juni 2024",
+    "preorder": null,
+    "release": "8. Juni 2024",
+    "releaseISO": "2024-06-08",
+    "upc": "198675381422",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "Unser Herz ist rund!"
+    ],
+    "cover": "herz.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Acerbic Arias, Anthemic Allegros, and Aching Adagios: An Amalgam of Audacious Affects",
+    "format": "Album",
+    "trackCount": 20,
+    "upload": "7. Juni 2024",
+    "preorder": null,
+    "release": "11. Juni 2024",
+    "releaseISO": "2024-06-11",
+    "upc": "198675570116",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "Odysseus",
+      "Old Memories",
+      "Rise",
+      "Simulation",
+      "That's just how good I am!",
+      "The Oath",
+      "Thesaurus",
+      "What it takes!",
+      "Howling",
+      "Fallin' Sun",
+      "Destroyed von this Desire",
+      "Brewing a Storm",
+      "Ashen Lands",
+      "Aghast",
+      "Abundance",
+      "A Change of Heart",
+      "A Broken Horizon",
+      "Thesaurus (Soothing)",
+      "Sublime de la tête aux pieds",
+      "La vraie nature démasquée"
+    ],
+    "cover": "acerbic.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Cogito ergo Summsumm: Philosophische Phrenesien im Pluralismus",
+    "format": "Album",
+    "trackCount": 21,
+    "upload": "3. Juni 2024",
+    "preorder": "3. Juni 2024",
+    "release": "11. Juni 2024",
+    "releaseISO": "2024-06-11",
+    "upc": "198676330719",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "Zahlen, bitte!",
+      "Der Wanderer",
+      "Bedeutungslos",
+      "Achilles",
+      "Äggen Time",
+      "Darf ich bitten?",
+      "Der fahle Reiter",
+      "Dieser Blick",
+      "Finanzokratie",
+      "Fleischkapuzenverkäufer",
+      "Glatt gegen die Wand",
+      "Leer v1",
+      "Leer v2",
+      "Was zum...",
+      "Erinnerungen",
+      "Weiter",
+      "Metapher",
+      "Melodía del Alma",
+      "Instants volés",
+      "Zéro patience, plein d'éloquence",
+      "Je suis à bout de toute cette merde!"
+    ],
+    "cover": "cogito.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Polycrisis Polka: Synchronizing Steps as Systems Collapse",
+    "format": "Album",
+    "trackCount": 15,
+    "upload": "2. August 2024",
+    "preorder": "2. August 2024",
+    "release": "9. August 2024",
+    "releaseISO": "2024-08-09",
+    "upc": "198665382910",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "Breaking",
+      "Delightful Agony",
+      "Drowning",
+      "Fly High",
+      "Gaslighting",
+      "Help",
+      "I'm wondering",
+      "Mask",
+      "Morality",
+      "Nothing",
+      "Own",
+      "Psychosis",
+      "Run!",
+      "The Hunt is on!",
+      "Time"
+    ],
+    "cover": "poly.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Hamsterrad-Hymnen: Lieder vom Laufrad des Lebens",
+    "format": "Album",
+    "trackCount": 15,
+    "upload": "2. August 2024",
+    "preorder": "2. August 2024",
+    "release": "9. August 2024",
+    "releaseISO": "2024-08-09",
+    "upc": "198665384761",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "Eine Kerze in der Nacht",
+      "Der Fall",
+      "Egal",
+      "Ein Flüstern im Sturm",
+      "Ewig",
+      "Golf",
+      "Handicap",
+      "Ist das so?",
+      "Mein Problem",
+      "Sag es!",
+      "Säureregen",
+      "Scharfe Marmelade",
+      "Spiel nicht mit mir!",
+      "Staub",
+      "Wer bin ich ohne dich?"
+    ],
+    "cover": "hamster.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Metanarrative Mixtape: Deconstructing Grand Designs",
+    "format": "Album",
+    "trackCount": 15,
+    "upload": "23. September 2024",
+    "preorder": null,
+    "release": "23. September 2024",
+    "releaseISO": "2024-09-23",
+    "upc": "198886390480",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "The Road Not Taken",
+      "Language, please!",
+      "The Cards We're Dealt",
+      "Bad Vibes",
+      "Mirror, Mirror",
+      "Potential",
+      "Spinoza",
+      "The Rain",
+      "Zeno's Arrow",
+      "Infinity",
+      "I am not your Hero",
+      "Zeitgeist",
+      "Beyond",
+      "Get Better!",
+      "UBI"
+    ],
+    "cover": "meta.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Zwischen Zeit und Werden",
+    "format": "Album",
+    "trackCount": 16,
+    "upload": "4. November 2024",
+    "preorder": null,
+    "release": "4. November 2024",
+    "releaseISO": "2024-11-04",
+    "upc": "198878312032",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "Wer bin ich?",
+      "Mach's noch CRISPR!",
+      "Fair ist Fair!",
+      "Erfind mir schnell noch ein Problem!",
+      "Augen zu und durch!",
+      "Das wilde Leben",
+      "Hinter den Wolken",
+      "Neues Glück",
+      "Tod? Langweilig!",
+      "Schatten im Gesicht",
+      "Unbekannte Wege",
+      "Wofür?",
+      "Zeit zum Lernen",
+      "Zu viel",
+      "Was ist das Ende?",
+      "Bonus Track: Schatten im Gesicht"
+    ],
+    "cover": "zwischen.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Like mich Kaputt",
+    "format": "Album",
+    "trackCount": 20,
+    "upload": "15. Dezember 2024",
+    "preorder": null,
+    "release": "16. Dezember 2024",
+    "releaseISO": "2024-12-16",
+    "upc": "199094939195",
+    "distribution": "24 Plattformen/Stores (inkl. Roblox)",
+    "tracks": [
+      "Zerbrochen",
+      "Hab ich mir gedacht",
+      "Fünfzig Fünfzig",
+      "Krank",
+      "Liebeslied des Zynikers",
+      "Ist doch gut",
+      "Eitelkeit",
+      "Diese Augen",
+      "Erzähl mir die Geschichte",
+      "Fantasie",
+      "Gott",
+      "Ich weiß es besser",
+      "Intellektuell",
+      "Pause",
+      "EZ Mode",
+      "Ratten",
+      "Schweigen",
+      "Ey, alter, ist das die Sonne?",
+      "Prometheus",
+      "Gönn ich mir"
+    ],
+    "cover": "like.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Phenomenology of the Unattempted",
+    "format": "Album",
+    "trackCount": 15,
+    "upload": "12. Februar 2025",
+    "preorder": "12. Februar 2025",
+    "release": "28. Februar 2025",
+    "releaseISO": "2025-02-28",
+    "upc": "199082459865",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "Chains of Thought",
+      "Deceit",
+      "Modern DiaHectic",
+      "Jaded As Graded",
+      "Education",
+      "Weltgeist",
+      "Eudaimonia",
+      "Woke, Said The Bloke",
+      "The King Who Called Himself A Fool",
+      "Pickled Brain Juice",
+      "The Monkey's Paw",
+      "Synthesis Of The Manifold",
+      "Fire Take Me",
+      "Nameless",
+      "All I Did Was Doing Nothing"
+    ],
+    "cover": "pheno.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "The Price of Waking Up",
+    "format": "Album",
+    "trackCount": 27,
+    "upload": "2. April 2025",
+    "preorder": null,
+    "release": "2. April 2025",
+    "releaseISO": "2025-04-02",
+    "upc": "199339240055",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "A WORLD TO KNOW",
+      "KEEPING YOU SAFE",
+      "GRUDGE",
+      "A BRAND NEW WORLD",
+      "ISN'T IT FUNNY?",
+      "GOOD LUCK!",
+      "KNIFE TO THE BRAIN",
+      "WHAT WE DESERVE",
+      "ON THE RUN",
+      "INDUCTIVE REASONING",
+      "HAMARTIA",
+      "LEFT TO ROT",
+      "MORDACIOUS",
+      "NOT AFRAID TO LOSE",
+      "MINE IS MINE",
+      "KIND OF",
+      "TRUE",
+      "BULLET",
+      "MAKE NO MISTAKE",
+      "NOTHING TO SEE",
+      "GET GOODER",
+      "WE VIBIN' HERE",
+      "WHO'S TO SAY?",
+      "WHEN DID IT STOP?",
+      "TAKIN' NAMES (PLAYIN' GAMES)",
+      "GIFTED",
+      "ALL IN GOOD FUN"
+    ],
+    "cover": "waking.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "The End Times New Roman",
+    "format": "Album",
+    "trackCount": 20,
+    "upload": "5. Mai 2025",
+    "preorder": "5. Mai 2025",
+    "release": "12. Mai 2025",
+    "releaseISO": "2025-05-12",
+    "upc": "199332160909",
+    "distribution": "24 Plattformen/Stores (inkl. Snapchat)",
+    "tracks": [
+      "A Moment in the Sun",
+      "A Heart Caught In A Storm",
+      "Absolution",
+      "Chicanery",
+      "Coin",
+      "Demons",
+      "Desires of a Heart",
+      "Fleeting",
+      "For a Box of Cereals",
+      "Full Moon",
+      "Keep",
+      "Like a Lie",
+      "Matter doesn't Matter",
+      "Old Man",
+      "Solution",
+      "The Right to be Wrong",
+      "The Last Day I Ever Really Dreamed",
+      "Vie",
+      "Wishing You The Best",
+      "Old Lou"
+    ],
+    "cover": "times.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Hand-to-Mouthful of Pills",
+    "format": "Album",
+    "trackCount": 15,
+    "upload": "6. Mai 2025",
+    "preorder": "6. Mai 2025",
+    "release": "1. Juni 2025",
+    "releaseISO": "2025-06-01",
+    "upc": "199331959634",
+    "distribution": "24 Plattformen/Stores (inkl. Snapchat)",
+    "tracks": [
+      "Gray Tape",
+      "Hot Garbage",
+      "Incubus",
+      "No Sphere",
+      "Take it All",
+      "The Stuff He Knows",
+      "This Guy",
+      "What a Fine Night",
+      "A Fistful of Shadows",
+      "Bee Trade",
+      "Building Worlds",
+      "Could You Spare a Dollar",
+      "Excuse Me",
+      "Figure Eight",
+      "The Dark Ballad of Lovely Death"
+    ],
+    "cover": "hand.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "The Monotony of Infinite Mornings",
+    "format": "Album",
+    "trackCount": 20,
+    "upload": "21. Juni 2025",
+    "preorder": null,
+    "release": "21. Juni 2025",
+    "releaseISO": "2025-06-21",
+    "upc": "199518441518",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "ADventure",
+      "Contract of Chains",
+      "Conzoom",
+      "Fahrer*in",
+      "Glazed Nuts",
+      "Grateful",
+      "Hardyacht",
+      "How to Sleep",
+      "I deserve this Pain",
+      "Ill",
+      "Lost in this Mirage",
+      "Messenger",
+      "No Cap",
+      "Orange Juice",
+      "Pancakes",
+      "Pew, Pew, Pew",
+      "Septic Feedback",
+      "Stop my Heart",
+      "Supplement",
+      "The World is slowing Down"
+    ],
+    "cover": "mono.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Everyday Apostasy",
+    "format": "Album",
+    "trackCount": 20,
+    "upload": "21. Juli 2025",
+    "preorder": null,
+    "release": "21. Juli 2025",
+    "releaseISO": "2025-07-21",
+    "upc": "199511518804",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "A Fallacy for All to See",
+      "à la carte",
+      "Armadillo Effect",
+      "File Can't be Read",
+      "GOATED",
+      "Goon Too Soon",
+      "Hooray!",
+      "I make this my nice Day",
+      "I thought I just knew better",
+      "King of the Hill",
+      "Let Me",
+      "Love, Love, Love it all (to Hell)",
+      "Oblivious",
+      "Painting You",
+      "Phantom",
+      "Rituals",
+      "Royal",
+      "Solace",
+      "Superman't",
+      "Supposedly"
+    ],
+    "cover": "everyday.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Mulligan!",
+    "format": "Single",
+    "trackCount": 1,
+    "upload": "15. August 2025",
+    "preorder": null,
+    "release": "15. August 2025",
+    "releaseISO": "2025-08-15",
+    "upc": "199327320004",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "Mulligan!"
+    ],
+    "cover": "mulligan.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "A Musical History of Human Thought",
+    "format": "Album",
+    "trackCount": 31,
+    "upload": "24. September 2025",
+    "preorder": "24. September 2025",
+    "release": "29. September 2025",
+    "releaseISO": "2025-09-29",
+    "upc": "199740495822",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "The River Fire (Heraclitus)",
+      "The Uncarved Block (Laozi)",
+      "Unsatisfactory (Siddhartha Gautama)",
+      "Mandate of Heaven, Rites of Earth (Confucius)",
+      "The Gadfly's Song (Socrates)",
+      "The Cave's Shadow (Plato)",
+      "The Golden Mean (Aristotle)",
+      "The Arrow Never Moves (Zeno of Elea)",
+      "City of God (Augustine of Hippo)",
+      "The Floating Man (Ibn Sina)",
+      "Incoherence of the Philosophers (Al-Ghazali)",
+      "The Double Truth (Ibn Rushd)",
+      "Five Ways to Find You Gone (Thomas Aquinas)",
+      "The Prince's Aria (Niccolò Machiavelli)",
+      "The First Certainty (René Descartes)",
+      "Deus Sive Natura (Baruch Spinoza)",
+      "White Paper (John Locke)",
+      "The Fork (David Hume)",
+      "The Chains We Chose (JeanJacques Rousseau)",
+      "A Vindication (Mary Wollstonecraft)",
+      "The Starry Heavens Above, The Moral Law Within (Immanuel Kant)",
+      "Dialectic (G.W.F Hegel)",
+      "Abraham's Knife (Søren Kierkegaard)",
+      "The Weight of Capital (Karl Marx)",
+      "Thus Spoke Zarathustra (Friedrich Nietzsche)",
+      "Tractatus 7 (Ludwig Wittgenstein)",
+      "Being-Towards-Betrayal (Martin Heidegger)",
+      "Existence Precedes Essence (Jean-Paul Sartre)",
+      "The Second Sex (Simone de Beauvoir)",
+      "White Mask, Black Scars (Frantz Fanon)",
+      "A Faded, Distant Scene"
+    ],
+    "cover": "musical.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Asymptote of Truth Under Aesthetic Conditions",
+    "format": "Album",
+    "trackCount": 20,
+    "upload": "2. Oktober 2025",
+    "preorder": null,
+    "release": "2. Oktober 2025",
+    "releaseISO": "2025-10-02",
+    "upc": "199742314503",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "Let me be Frank(enstein)",
+      "Lord of the Flies",
+      "Lugubrious",
+      "Mathematically",
+      "Motte and Bailey",
+      "Nonpareil",
+      "Recursion",
+      "This ain't it",
+      "This is what I do",
+      "Truce",
+      "Weak after Weak",
+      "Categorical Slip",
+      "Cheap Laughs (No Surprise)",
+      "Colder",
+      "Comeuppance",
+      "Dial",
+      "I Drew a Map",
+      "In Abeyance",
+      "Galumph!",
+      "Hyde"
+    ],
+    "cover": "asymptote.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Über die Bedingung der Möglichkeit von Musik, sofern und nur sofern das animal rationale, sensu electivo, die Töne anerkennt",
+    "format": "Album",
+    "trackCount": 15,
+    "upload": "10. Oktober 2025",
+    "preorder": null,
+    "release": "10. Oktober 2025",
+    "releaseISO": "2025-10-10",
+    "upc": "199744059938",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "Musik",
+      "Ursula Langhaar",
+      "Eins, Zwei, Drei",
+      "Heimat",
+      "Schlaflos",
+      "Der Weg",
+      "Achtung, Drehung!",
+      "Einfach mal gewinnen!",
+      "Es tut dir leid",
+      "Fetzo",
+      "Lack",
+      "Monsterchen",
+      "Wind",
+      "Zerbrich (nicht)",
+      "Zeit zu gehen"
+    ],
+    "cover": "bedingung.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Die Geometrie des Zweifels",
+    "format": "Album",
+    "trackCount": 10,
+    "upload": "18. November 2025",
+    "preorder": "18. November 2025",
+    "release": "26. November 2025",
+    "releaseISO": "2025-11-26",
+    "upc": "199952854523",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "Yo, Moin!",
+      "Wo lang?",
+      "Voll Leer",
+      "Tauben aus Metall",
+      "Spielerei",
+      "Fernbedienung",
+      "Fass",
+      "Geduld",
+      "Einst",
+      "Kurze Zeit"
+    ],
+    "cover": "geometry.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Variable X in the Function of Collapse: Distorted Feedback Loops in the Societal Observation Chamber",
+    "format": "Album",
+    "trackCount": 10,
+    "upload": "11. Januar 2026",
+    "preorder": "11. Januar 2026",
+    "release": "16. Januar 2026",
+    "releaseISO": "2026-01-16",
+    "upc": "821550060296",
+    "distribution": "24 Plattformen/Stores (inkl. Snapchat)",
+    "tracks": [
+      "Bullet Tears",
+      "Carried",
+      "Glassy Eyes",
+      "It's fine",
+      "Say no more",
+      "Stare",
+      "Taken",
+      "Welcome to my Wonderland",
+      "Wings",
+      "Your Take"
+    ],
+    "cover": "variable.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Über die semantische Entleerung des Glaubensbegriffs im Modus der doppelten Affirmation",
+    "format": "Album",
+    "trackCount": 20,
+    "upload": "11. Januar 2026",
+    "preorder": "11. Januar 2026",
+    "release": "30. Januar 2026",
+    "releaseISO": "2026-01-30",
+    "upc": "821550057203",
+    "distribution": "24 Plattformen/Stores (inkl. Snapchat)",
+    "tracks": [
+      "Da geht noch mehr",
+      "Damit kannste nicht rechnen",
+      "Das geht klar!",
+      "Echt schlau!",
+      "Eigentlich",
+      "Einfach mal kurz sterben",
+      "Ey, Alter, hast du das geklaut?",
+      "Genauso wie Früher",
+      "Hab dich echt ganz gern",
+      "Hände",
+      "Ich muss Sie sagen",
+      "Irgendwann",
+      "Ist da preislich was zu machen?",
+      "Keine Zeit",
+      "Mach mal einer das Licht aus",
+      "Mal was Neues",
+      "Tja",
+      "Wechselgeld",
+      "Wille Nich",
+      "Worum es geht"
+    ],
+    "cover": "semantic.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Second-Hand Bratwurst",
+    "format": "Single",
+    "trackCount": 1,
+    "upload": "6. März 2026",
+    "preorder": null,
+    "release": "7. März 2026",
+    "releaseISO": "2026-03-07",
+    "upc": "825204734472",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "Second-Hand Bratwurst"
+    ],
+    "cover": "secondhand.jpg",
+    "spotifyId": ""
+  },
+  {
+    "title": "Weltspartag",
+    "format": "Album",
+    "trackCount": 10,
+    "upload": "12. März 2026",
+    "preorder": null,
+    "release": "13. März 2026",
+    "releaseISO": "2026-03-13",
+    "upc": "825758016574",
+    "distribution": "23 Plattformen/Stores",
+    "tracks": [
+      "Weltspartag",
+      "Was leisten",
+      "Bienenstich",
+      "Endlich!",
+      "Kannst vergessen",
+      "Maskenpflicht",
+      "Nimm Zwei",
+      "Peter",
+      "Tacho",
+      "Verlieren"
+    ],
+    "cover": "weltspartag.jpg",
+    "spotifyId": ""
+  }
+];
+
+    const SPOTIFY_IDS = {
+  "Rhymes and Reason": "6ZFW2UYKXnKaWMC6X9sur9",
+  "Klangkaskaden": "3p0sX7cuLIgr0lIJJjNiuQ",
+  "Limbic System Lullabies: Cradle Songs for the Amygdala": "6Ztf9zvmpeR7c0MF2QviX1",
+  "Ode an die Freude (und andere Gefühlszustände)": "4J9ESm0kSSx0C3CA7VNPCs",
+  "Data-Driven Dreams": "4Ozus5nuDA33YS6vi49gim",
+  "Unser Herz ist rund!": "2jsBkWg93yspWENoiFails",
+  "Acerbic Arias, Anthemic Allegros, and Aching Adagios: An Amalgam of Audacious Affects": "6N5nNlcSWSC8m39HwEZCWD",
+  "Cogito ergo Summsumm: Philosophische Phrenesien im Pluralismus": "4CIXvxTLos1KRwEg3BznEU",
+  "Polycrisis Polka: Synchronizing Steps as Systems Collapse": "3k2KqGHDrlSor3O9lOvoDZ",
+  "Hamsterrad-Hymnen: Lieder vom Laufrad des Lebens": "6LHLWpQdcqMzoHCIPnP9y0",
+  "Metanarrative Mixtape: Deconstructing Grand Designs": "2ZEXXJRYU28Krdj3jNnVjS",
+  "Zwischen Zeit und Werden": "4FMTqXAMGLo0fswXr1f1R4",
+  "Like mich Kaputt": "2v3JNm1cMeENyKbqTx1uuh",
+  "Phenomenology of the Unattempted": "5TEvBRnNAwzo1Utrlnc4TS",
+  "The Price of Waking Up": "05sF77qv1EQnbOsaPEK3WG",
+  "The End Times New Roman": "6od21oXZ5oanO1hrTLdsoU",
+  "Hand-to-Mouthful of Pills": "3Cxdck3qDIGaHdTLnU055O",
+  "The Monotony of Infinite Mornings": "4UiE6fwHD4jQqkgQwu2VFk",
+  "Everyday Apostasy": "1g7nPBHGrdxjjyyI8YLpix",
+  "Mulligan!": "2oYt0JapCuMRbsiNbvtfpF",
+  "A Musical History of Human Thought": "0RX5gqG51k9DS7G3QrVxFV",
+  "Asymptote of Truth Under Aesthetic Conditions": "1eTGlzku0PLCku2t1nw0i2",
+  "Über die Bedingung der Möglichkeit von Musik, sofern und nur sofern das animal rationale, sensu electivo, die Töne anerkennt": "1OIz9pBZsdEBiV9Wa0pMSH",
+  "Die Geometrie des Zweifels": "0YXagvx2fJh0BeMTl6p18t",
+  "Variable X in the Function of Collapse: Distorted Feedback Loops in the Societal Observation Chamber": "4bQLrjMfFzCednfKsqOeZp",
+  "Über die semantische Entleerung des Glaubensbegriffs im Modus der doppelten Affirmation": "1MUH3QrF5pO6Xjjw3sMcjg",
+  "Second-Hand Bratwurst": "592d7cgmIJ6spyEwZzVqiC",
+  "Weltspartag": "2u9Z4FcoFkjoACT6dILqKu"
+};
+
+    const main = document.getElementById("main");
+    const releasesRoot = document.getElementById("releases");
+    const activeYearChip = document.getElementById("activeYearChip");
+    const releaseCountChip = document.getElementById("releaseCountChip");
+    const spotifySelect = document.getElementById("spotifySelect");
+    const spotifyCurrent = document.getElementById("spotifyCurrent");
+    const spotifyFrame = document.getElementById("spotifyFrame");
+    const spotifyEmpty = document.getElementById("spotifyEmpty");
+    const scrollStopVideo = document.getElementById("scrollStopVideo");
+    const introStatus = document.getElementById("introStatus");
+    const intro = document.getElementById("intro");
+    const startExperience = document.getElementById("startExperience");
+
+    let animationPlayed = false;
+    let animationLock = false;
+    let animationTimer = null;
+    let currentReleaseTitle = "";
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function formatMeta(album) {
+      const items = [
+        { label: "Format", value: album.format },
+        { label: "Release", value: album.release },
+        { label: "Tracks", value: String(album.trackCount) },
+        { label: "UPC", value: album.upc },
+      ];
+
+      if (album.preorder) {
+        items.splice(2, 0, { label: "Preorder", value: album.preorder });
+      } else if (album.upload) {
+        items.splice(2, 0, { label: "Upload", value: album.upload });
+      }
+
+      return items
+        .slice(0, 4)
+        .map(
+          (item) => `
+            <div class="meta-item">
+              <small>${escapeHtml(item.label)}</small>
+              <strong>${escapeHtml(item.value)}</strong>
+            </div>
+          `
+        )
+        .join("");
+    }
+
+    function releaseDescription(album) {
+      return `${album.format} · Release ${album.release} · ${album.trackCount} Track${album.trackCount === 1 ? "" : "s"}`;
+    }
+
+    function renderReleases() {
+      releasesRoot.innerHTML = releases
+        .map((album, index) => {
+          const coverPath = album.cover ? `./assets/covers/${album.cover}` : "";
+          const tracks = album.tracks
+            .map((track) => `<li>${escapeHtml(track)}</li>`)
+            .join("");
+
+          const fallback = `
+            <div class="cover-fallback">
+              <strong>${escapeHtml(album.title)}</strong>
+              <span>${escapeHtml(releaseDescription(album))}</span>
+            </div>
+          `;
+
+          const encodedFallback = encodeURIComponent(fallback);
+
+          const coverHtml = coverPath
+            ? `
+              <div class="cover-frame">
+                <img
+                  src="${coverPath}"
+                  alt="Cover von ${escapeHtml(album.title)}"
+                  loading="lazy"
+                  onerror="this.style.display='none'; this.closest('.cover-frame').insertAdjacentHTML('beforeend', decodeURIComponent('${encodedFallback}'))"
+                />
+              </div>
+            `
+            : `<div class="cover-frame">${fallback}</div>`;
+
+          return `
+            <section class="section release" id="release-${index}" data-year="${album.releaseISO.slice(0, 4)}" data-title="${escapeHtml(album.title)}">
+              <div class="release-card">
+                <div class="release-anchor">${album.releaseISO.slice(0, 4)}</div>
+                <div class="cover-stack">
+                  ${coverHtml}
+                  <div class="mini-meta">
+                    <span>${escapeHtml(album.format)}</span>
+                    <span>${escapeHtml(album.release)}</span>
+                    <span>${album.trackCount} Track${album.trackCount === 1 ? "" : "s"}</span>
+                  </div>
+                </div>
+
+                <div class="content">
+                  <div class="content-head">
+                    <h2 class="release-title">${escapeHtml(album.title)}</h2>
+                    <p class="release-sub">${escapeHtml(album.distribution || "Auslieferung nicht angegeben")}</p>
+                  </div>
+
+                  <div class="meta-grid">
+                    ${formatMeta(album)}
+                  </div>
+
+                  <div class="tracks">
+                    <div class="tracks-head">
+                      <h3>Trackliste</h3>
+                      <span>${album.trackCount} Einträge</span>
+                    </div>
+                    <ol class="track-list">${tracks}</ol>
+                  </div>
+                </div>
+              </div>
+            </section>
+          `;
+        })
+        .join("");
+    }
+
+    function buildSelect() {
+      spotifySelect.innerHTML = releases
+        .map(
+          (album) =>
+            `<option value="${escapeHtml(album.title)}">${escapeHtml(album.releaseISO)} · ${escapeHtml(album.title)}</option>`
+        )
+        .join("");
+    }
+
+    function spotifyToEmbed(value) {
+      if (!value) return "";
+      const raw = value.trim();
+
+      if (/^https:\/\/open\.spotify\.com\/embed\//i.test(raw)) {
+        return raw.includes("?") ? raw : `${raw}?utm_source=generator&theme=0`;
+      }
+
+      if (/^https:\/\/open\.spotify\.com\/(album|track|playlist)\//i.test(raw)) {
+        const withEmbed = raw.replace("https://open.spotify.com/", "https://open.spotify.com/embed/");
+        return withEmbed.includes("?") ? withEmbed : `${withEmbed}?utm_source=generator&theme=0`;
+      }
+
+      const uriMatch = raw.match(/^spotify:(album|track|playlist):([A-Za-z0-9]{22})$/i);
+      if (uriMatch) {
+        return `https://open.spotify.com/embed/${uriMatch[1].toLowerCase()}/${uriMatch[2]}?utm_source=generator&theme=0`;
+      }
+
+      if (/^[A-Za-z0-9]{22}$/.test(raw)) {
+        return `https://open.spotify.com/embed/album/${raw}?utm_source=generator&theme=0`;
+      }
+
+      return "";
+    }
+
+    function updateSpotify(title) {
+      const album = releases.find((item) => item.title === title);
+      if (!album) return;
+
+      currentReleaseTitle = album.title;
+      spotifySelect.value = album.title;
+
+      const embedUrl = spotifyToEmbed(SPOTIFY_IDS[album.title] || album.spotifyId || "");
+      spotifyCurrent.textContent = album.title;
+
+      if (embedUrl) {
+        spotifyFrame.src = embedUrl;
+        spotifyFrame.style.display = "block";
+        spotifyEmpty.style.display = "none";
+      } else {
+        spotifyFrame.removeAttribute("src");
+        spotifyFrame.style.display = "none";
+        spotifyEmpty.style.display = "grid";
+      }
+    }
+
+    function jumpToFirstRelease() {
+      const firstRelease = document.querySelector(".release");
+      if (firstRelease) {
+        firstRelease.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
+    function introVisible() {
+      return main.scrollTop < Math.max(window.innerHeight * 0.45, 240);
+    }
+
+    function finishAnimation() {
+      clearTimeout(animationTimer);
+      animationPlayed = true;
+      animationLock = false;
+      main.classList.remove("locked");
+      intro.classList.remove("playing");
+      
+      const heroCopy = document.getElementById("heroCopy");
+      if (heroCopy) {
+        heroCopy.style.opacity = "1";
+        heroCopy.style.pointerEvents = "auto";
+      }
+      
+      jumpToFirstRelease();
+    }
+
+    function triggerScrollStop() {
+      if (animationPlayed || animationLock) {
+        return;
+      }
+
+      animationLock = true;
+      main.classList.add("locked");
+      intro.classList.add("playing");
+
+      const hasPlayableSource = scrollStopVideo.querySelector("source")?.getAttribute("src");
+      if (hasPlayableSource) {
+        scrollStopVideo.currentTime = 0;
+        scrollStopVideo.play().catch(() => {
+          // Fallback if video is blocked
+        });
+      }
+
+      const duration = Number.isFinite(scrollStopVideo.duration) && scrollStopVideo.duration > 0
+        ? Math.min(scrollStopVideo.duration * 1000 + 180, 8000)
+        : 5200;
+
+      animationTimer = window.setTimeout(finishAnimation, duration);
+    }
+
+    function triggerFromInput(event) {
+      if (!introVisible() || animationPlayed) {
+        return;
+      }
+      if (event.type === "wheel" && event.deltaY <= 0) {
+        return;
+      }
+      event.preventDefault();
+      triggerScrollStop();
+    }
+
+    function bindIntro() {
+      startExperience.addEventListener("click", (event) => {
+        event.preventDefault();
+        
+        // Replay Logic
+        animationPlayed = false;
+        
+        const heroCopy = document.getElementById("heroCopy");
+        if (heroCopy) {
+          heroCopy.style.opacity = "0";
+          heroCopy.style.pointerEvents = "none";
+        }
+        
+        triggerScrollStop();
+      });
+
+      main.addEventListener("wheel", triggerFromInput, { passive: false });
+      main.addEventListener("touchmove", triggerFromInput, { passive: false });
+
+      window.addEventListener("keydown", (event) => {
+        if (!introVisible() || animationPlayed) return;
+        if (["Space", "PageDown", "ArrowDown", "Enter"].includes(event.code)) {
+          event.preventDefault();
+          triggerScrollStop();
+        }
+      });
+
+      scrollStopVideo.addEventListener("ended", finishAnimation);
+    }
+
+    function observeSections() {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter((entry) => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+          if (!visible) return;
+
+          const section = visible.target;
+          const year = section.dataset.year || "Intro";
+          const title = section.dataset.title || "Intro";
+
+          activeYearChip.textContent = `Aktuell: ${year}`;
+          releaseCountChip.textContent = `${releases.length} Releases`;
+
+          if (section.classList.contains("release") && title !== currentReleaseTitle) {
+            updateSpotify(title);
+          }
+        },
+        {
+          threshold: [0.33, 0.55, 0.75]
+        }
+      );
+
+      document.querySelectorAll(".section").forEach((section) => observer.observe(section));
+    }
+
+    function bindSpotifySelect() {
+      spotifySelect.addEventListener("change", () => {
+        const selected = releases.find((item) => item.title === spotifySelect.value);
+        if (!selected) return;
+        updateSpotify(selected.title);
+        const target = [...document.querySelectorAll(".release")].find(
+          (node) => node.dataset.title === selected.title
+        );
+        target?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
+
+    function bindSpotifyMinimize() {
+      const spotifyDock = document.querySelector(".spotify-dock");
+      const spotifyToggle = document.getElementById("spotifyToggle");
+      
+      if(spotifyToggle && spotifyDock) {
+        spotifyToggle.addEventListener("click", () => {
+          spotifyDock.classList.toggle("minimized");
+          
+          if(spotifyDock.classList.contains("minimized")) {
+            spotifyToggle.textContent = "Maximieren";
+          } else {
+            spotifyToggle.textContent = "Minimieren";
+          }
+        });
+      }
+    }
+
+    renderReleases();
+    buildSelect();
+    bindIntro();
+    bindSpotifySelect();
+    bindSpotifyMinimize();
+    observeSections();
+    updateSpotify(releases[0]?.title || "");
+  
+function openModal(id){
+  const el=document.getElementById('modal-'+id);
+  el.classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function closeModal(id){
+  document.getElementById('modal-'+id).classList.remove('show');
+  document.body.style.overflow='';
+}
+function closeOnOverlay(e,id){
+  if(e.target===document.getElementById('modal-'+id)) closeModal(id);
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal('impressum');closeModal('datenschutz');}});
+
+
+const st={a:false,m:false};
+function tog(k){
+  st[k]=!st[k];
+  const tr=document.getElementById('tr-'+k);
+  const th=document.getElementById('th-'+k);
+  tr.style.background=st[k]?'#f0a500':'rgba(255,255,255,.15)';
+  th.style.left=st[k]?'22px':'4px';
+}
+let open=false;
+function toggleSettings(){
+  open=!open;
+  const sp=document.getElementById('sp');
+  const sb=document.getElementById('sb');
+  const svb=document.getElementById('svb');
+  sp.classList.toggle('open',open);
+  sb.textContent=open?'Einstellungen schließen':'Einstellungen anpassen';
+  svb.style.display=open?'inline':'none';
+}
+function accept(mode){
+  const labels={all:'Alle Cookies akzeptiert',necessary:'Nur notwendige Cookies aktiv',custom:'Deine Auswahl gespeichert'};
+  const sub={all:'Personalisierte Wiedergabe & Empfehlungen aktiv.',necessary:'Nur essentielle Funktionen werden genutzt.',custom:(st.a||st.m)?'Ausgewählte Cookies sind aktiv.':'Nur notwendige Cookies aktiv.'};
+  document.getElementById('cw').innerHTML=`
+    <div style="background:#0c0c0c;border:0.5px solid rgba(255,255,255,.11);border-radius:18px;padding:32px 28px;color:#f0f0f0;font-family:var(--font-sans);text-align:center;">
+      <div style="display:flex;justify-content:center;margin-bottom:16px;animation:spin 3s linear infinite;">
+        <svg viewBox="0 0 60 60" width="52" height="52"><circle cx="30" cy="30" r="29" fill="#1c1c1c"/><circle cx="30" cy="30" r="23" fill="#141414"/><circle cx="30" cy="30" r="12" fill="#f0a500"/><circle cx="30" cy="30" r="3.2" fill="#0c0c0c"/></svg>
+      </div>
+      <p style="font-size:16px;font-weight:500;color:#fff;margin:0 0 8px;">${labels[mode]}</p>
+      <p style="font-size:13px;color:rgba(255,255,255,.45);margin:0 0 20px;">${sub[mode]}</p>
+      <p style="font-size:11.5px;color:rgba(255,255,255,.25);margin:0;line-height:1.5;">Du kannst deine Einstellungen jederzeit in den Datenschutz-Einstellungen ändern.</p>
+    </div>`;
+  setTimeout(() => { document.getElementById('cookieOverlay').style.opacity = "0"; setTimeout(() => document.getElementById('cookieOverlay').style.display = "none", 500); }, 1800);
+}
+
+</script>
+</body>
+</html>
