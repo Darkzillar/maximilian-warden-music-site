@@ -986,9 +986,32 @@ button:hover{opacity:.85}
     <video id="m-video" muted playsinline preload="metadata">
       <source src="./assets/scroll-stop-animation.mp4" type="video/mp4" />
     </video>
-    <div id="m-tap-hint">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-      Tippen zum Starten
+    <!-- Always-visible content so the screen doesn't look black / broken -->
+    <div id="m-intro-content">
+      <div id="m-intro-vinyl">
+        <svg viewBox="0 0 120 120" width="140" height="140">
+          <circle cx="60" cy="60" r="58" fill="#111"/>
+          <circle cx="60" cy="60" r="50" fill="#0d0d0d"/>
+          <circle cx="60" cy="60" r="42" fill="#111"/>
+          <circle cx="60" cy="60" r="34" fill="#0d0d0d"/>
+          <circle cx="60" cy="60" r="22" fill="#f0a500"/>
+          <circle cx="60" cy="60" r="14" fill="#0d0d0d"/>
+          <circle cx="60" cy="60" r="6" fill="#f0a500"/>
+          <circle cx="60" cy="60" r="2.5" fill="#0a0a0a"/>
+        </svg>
+      </div>
+      <div id="m-intro-name">Maximilian Warden</div>
+      <div id="m-intro-bars">
+        <div style="width:3px;background:#f0a500;border-radius:2px;animation:b1 1.1s ease-in-out infinite"></div>
+        <div style="width:3px;background:#f0a500;border-radius:2px;animation:b2 .85s ease-in-out infinite"></div>
+        <div style="width:3px;background:#f0a500;border-radius:2px;animation:b3 1.3s ease-in-out infinite"></div>
+        <div style="width:3px;background:#f0a500;border-radius:2px;animation:b4 .95s ease-in-out infinite"></div>
+        <div style="width:3px;background:#f0a500;border-radius:2px;animation:b5 .75s ease-in-out infinite"></div>
+      </div>
+      <div id="m-tap-hint">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        Tippen zum Starten
+      </div>
     </div>
   </div>
 
@@ -1067,14 +1090,29 @@ button:hover{opacity:.85}
     transition: opacity 400ms;
   }
   #m-intro.playing #m-video { opacity: 0.96; }
-  #m-tap-hint {
-    position: absolute; bottom: 60px;
-    display: flex; flex-direction: column; align-items: center; gap: 10px;
-    color: rgba(255,255,255,0.5); font-size: 14px; letter-spacing: 0.06em;
-    animation: m-pulse 2s ease-in-out infinite;
-    z-index: 2;
+  /* Fade out intro content when video plays */
+  #m-intro.playing #m-intro-content { opacity: 0; pointer-events: none; }
+
+  #m-intro-content {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 18px; z-index: 2; position: relative;
+    transition: opacity 0.4s ease;
   }
-  @keyframes m-pulse { 0%,100%{opacity:0.4;transform:translateY(0)} 50%{opacity:0.85;transform:translateY(4px)} }
+  #m-intro-vinyl { animation: spin 4s linear infinite; filter: drop-shadow(0 0 20px rgba(240,165,0,0.25)); }
+  #m-intro-name {
+    font-size: 22px; font-weight: 600; letter-spacing: -0.02em;
+    color: rgba(255,255,255,0.85);
+  }
+  #m-intro-bars {
+    display: flex; align-items: flex-end; gap: 3px; height: 22px;
+  }
+  #m-tap-hint {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: rgba(255,255,255,0.4); font-size: 13px; letter-spacing: 0.06em;
+    margin-top: 6px;
+    animation: m-pulse 2s ease-in-out infinite;
+  }
+  @keyframes m-pulse { 0%,100%{opacity:0.35;transform:translateY(0)} 50%{opacity:0.75;transform:translateY(4px)} }
 
   /* ---- Phase 2 - App ---- */
   #m-app {
@@ -1152,13 +1190,17 @@ button:hover{opacity:.85}
     flex: 1;
     min-height: 0;
     padding: 0 16px 0;
+    background: #000; /* Prevent white gap behind Spotify iframe */
+    border-radius: 14px;
+    margin: 0 16px;
+    overflow: hidden;
     position: relative;
   }
   #m-player-empty {
     text-align: center; font-size: 13px; color: rgba(255,255,255,0.3);
     padding: 24px; line-height: 1.6;
   }
-  #m-spotify { width: 100%; height: 100%; border: none; border-radius: 14px; }
+  #m-spotify { width: 100%; height: 100%; border: none; border-radius: 14px; background: #000; }
 
   #m-footer-links {
     flex-shrink: 0;
@@ -1279,6 +1321,13 @@ button:hover{opacity:.85}
     mAnimLock = false;
     setTimeout(mPlayIntro, 80);
   }
+
+  // --- Move modals + cookie overlay outside #app so they can stack above mobile-view ---
+  // (needed because #app has 'isolation: isolate' which traps their z-index)
+  ['modal-impressum', 'modal-datenschutz', 'cookieOverlay'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) document.body.appendChild(el);
+  });
 
   // Init: hide app, show intro
   mApp.style.display = 'none';
