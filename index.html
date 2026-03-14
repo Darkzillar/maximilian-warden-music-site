@@ -986,6 +986,71 @@ button:hover{opacity:.85}
   </div>
 </div>
 
+<!-- COOKIE-RICHTLINIE MODAL -->
+<div id="modal-cookie" class="modal-overlay" onclick="closeOnOverlay(event,'cookie')">
+  <div class="modal-box">
+    <div style="padding:24px 28px 18px;border-bottom:0.5px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:14px;flex-shrink:0;">
+      <div style="animation:spin 7s linear infinite;flex-shrink:0;">
+        <svg viewBox="0 0 44 44" width="36" height="36"><circle cx="22" cy="22" r="21" fill="#1c1c1c"/><circle cx="22" cy="22" r="10" fill="#f0a500"/><circle cx="22" cy="22" r="2.5" fill="#0c0c0c"/></svg>
+      </div>
+      <div style="flex:1;">
+        <p style="font-size:18px;font-weight:500;color:#fff;margin:0 0 2px;font-family:var(--font-sans);">Cookie-Richtlinie</p>
+        <p style="font-size:11px;color:rgba(255,255,255,.3);margin:0;font-family:var(--font-sans);letter-spacing:.8px;text-transform:uppercase;">DSGVO · Art. 6 Abs. 1</p>
+      </div>
+      <button onclick="closeModal('cookie')" style="background:rgba(255,255,255,.07);border:0.5px solid rgba(255,255,255,.1);border-radius:8px;color:rgba(255,255,255,.5);font-size:18px;cursor:pointer;width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--font-sans);">✕</button>
+    </div>
+    <div class="modal-scroll" style="padding-top:24px;">
+
+      <div class="modal-section">
+        <div class="modal-section-title">Was sind Cookies?</div>
+        <p>Cookies sind kleine Textdateien, die beim Besuch einer Website auf deinem Gerät gespeichert werden. Sie ermöglichen es, bestimmte Einstellungen und Informationen über deinen Besuch hinaus zu speichern, um das Nutzererlebnis zu verbessern oder statistische Auswertungen zu ermöglichen.</p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Notwendige Cookies (immer aktiv)</div>
+        <p>Diese Cookies sind für den technischen Betrieb der Website unerlässlich und können nicht deaktiviert werden. Sie speichern z. B. deine Cookie-Einwilligung (localStorage), sodass du beim nächsten Besuch nicht erneut gefragt wirst.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;">
+          <span class="tag">Zweck: Technischer Betrieb</span>
+          <span class="tag">Speicherdauer: 12 Monate</span>
+          <span class="tag">Anbieter: Eigene Website</span>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Analyse & Statistiken (opt-in)</div>
+        <p>Mit deiner Einwilligung können Analyse-Cookies gesetzt werden, die helfen zu verstehen, wie Besucher die Website nutzen. Dies ermöglicht die kontinuierliche Verbesserung des Angebots. Die IP-Adresse wird dabei anonymisiert (IP-Masking). Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;">
+          <span class="tag">Zweck: Nutzungsanalyse</span>
+          <span class="tag">Speicherdauer: bis zu 14 Monate</span>
+          <span class="tag">Anbieter: Drittanbieter (z. B. Google Analytics)</span>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Marketing & Personalisierung (opt-in)</div>
+        <p>Marketing-Cookies ermöglichen personalisierte Musik­empfehlungen und die Anzeige relevanter Inhalte. Sie können von Drittanbietern gesetzt werden und geräteübergreifend wirken. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;">
+          <span class="tag">Zweck: Personalisierung</span>
+          <span class="tag">Speicherdauer: bis zu 24 Monate</span>
+          <span class="tag">Anbieter: Drittanbieter</span>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Spotify Embed</div>
+        <p>Diese Website bindet den Spotify-Player über die offizielle Embed-Funktion ein. Spotify kann dabei eigene Cookies und Tracking-Technologien einsetzen, unabhängig von deinen Einstellungen hier. Weitere Informationen findest du in der <a href="https://www.spotify.com/de/legal/privacy-policy/" target="_blank">Datenschutzerklärung von Spotify</a>.</p>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">Einwilligung verwalten</div>
+        <p>Du kannst deine Einwilligung jederzeit widerrufen oder anpassen. Beim nächsten Seitenaufruf wird der Cookie-Banner erneut angezeigt, wenn du deine Einwilligung zurückziehst. Die Rechtmäßigkeit der bis zum Widerruf erfolgten Verarbeitung bleibt unberührt (Art. 7 Abs. 3 DSGVO).</p>
+        <p>Kontakt bei Fragen zum Datenschutz: <a href="mailto:kontakt@maximilianwarden.de">kontakt@maximilianwarden.de</a></p>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <!-- DATENSCHUTZ MODAL -->
 <div id="modal-datenschutz" class="modal-overlay" onclick="closeOnOverlay(event,'datenschutz')">
   <div class="modal-box">
@@ -1176,12 +1241,13 @@ button:hover{opacity:.85}
   <div style="border-top:0.5px solid rgba(255,255,255,.08);padding-top:13px;display:flex;gap:0;flex-wrap:wrap;">
     <a href="#" onclick="event.preventDefault();openModal('datenschutz')" style="font-size:11.5px;color:rgba(255,255,255,.3);text-decoration:none;margin-right:16px;">Datenschutzerklärung</a>
     <a href="#" onclick="event.preventDefault();openModal('impressum')" style="font-size:11.5px;color:rgba(255,255,255,.3);text-decoration:none;margin-right:16px;">Impressum</a>
-    <a href="#" style="font-size:11.5px;color:rgba(255,255,255,.3);text-decoration:none;">Cookie-Richtlinie</a>
+    <a href="#" onclick="event.preventDefault();openModal('cookie')" style="font-size:11.5px;color:rgba(255,255,255,.3);text-decoration:none;">Cookie-Richtlinie</a>
   </div>
 
 </div>
 </div>
 </div>
+<script>try{if(localStorage.getItem('mw_cookie_consent'))document.getElementById('cookieOverlay').style.display='none';}catch(e){}</script>
 
 
 
@@ -1544,7 +1610,7 @@ button:hover{opacity:.85}
 
   // --- Move modals + cookie overlay outside #app so they can stack above mobile-view ---
   // (needed because #app has 'isolation: isolate' which traps their z-index)
-  ['modal-impressum', 'modal-datenschutz', 'cookieOverlay'].forEach(function(id) {
+  ['modal-impressum', 'modal-datenschutz', 'modal-cookie', 'cookieOverlay'].forEach(function(id) {
     const el = document.getElementById(id);
     if (el) document.body.appendChild(el);
   });
@@ -2900,7 +2966,7 @@ function closeModal(id){
 function closeOnOverlay(e,id){
   if(e.target===document.getElementById('modal-'+id)) closeModal(id);
 }
-document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal('impressum');closeModal('datenschutz');}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal('impressum');closeModal('datenschutz');closeModal('cookie');}});
 
 
 const st={a:false,m:false};
@@ -2922,6 +2988,7 @@ function toggleSettings(){
   svb.style.display=open?'inline':'none';
 }
 function accept(mode){
+  localStorage.setItem('mw_cookie_consent', JSON.stringify({mode:mode,a:st.a,m:st.m,ts:Date.now()}));
   const labels={all:'Alle Cookies akzeptiert',necessary:'Nur notwendige Cookies aktiv',custom:'Deine Auswahl gespeichert'};
   const sub={all:'Personalisierte Wiedergabe & Empfehlungen aktiv.',necessary:'Nur essentielle Funktionen werden genutzt.',custom:(st.a||st.m)?'Ausgewählte Cookies sind aktiv.':'Nur notwendige Cookies aktiv.'};
   document.getElementById('cw').innerHTML=`
@@ -2935,6 +3002,15 @@ function accept(mode){
     </div>`;
   setTimeout(() => { document.getElementById('cookieOverlay').style.opacity = "0"; setTimeout(() => document.getElementById('cookieOverlay').style.display = "none", 500); }, 1800);
 }
+(function(){
+  try {
+    const saved = localStorage.getItem('mw_cookie_consent');
+    if(saved) {
+      const el = document.getElementById('cookieOverlay');
+      if(el) el.style.display = 'none';
+    }
+  } catch(e){}
+})();
 
 </script>
 </body>
