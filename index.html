@@ -1190,11 +1190,22 @@ button:hover{opacity:.85}
     flex: 1;
     min-height: 0;
     padding: 0 16px 0;
-    background: #000; /* Prevent white gap behind Spotify iframe */
+    background: #07080d; /* Match page background */
     border-radius: 14px;
     margin: 0 16px;
     overflow: hidden;
     position: relative;
+  }
+  /* Gradient overlay to hide the white bottom of the Spotify iframe */
+  #m-player::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 80px;
+    background: linear-gradient(to bottom, transparent, #07080d);
+    pointer-events: none;
+    border-radius: 0 0 14px 14px;
+    z-index: 2;
   }
   #m-player-empty {
     text-align: center; font-size: 13px; color: rgba(255,255,255,0.3);
