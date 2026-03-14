@@ -1,0 +1,663 @@
+{
+  "erstellt_am": "2026-03-14",
+  "quelle": "Vom Nutzer bereitgestellte KDP- und Amazon-Textauszüge",
+  "autor_standard": "Maximilian Warden",
+  "buecher": [
+    {
+      "titel": "Ultimus Thesaurus: Der letzte Schatz",
+      "autor": "Maximilian Warden",
+      "reihe": null,
+      "reihe_status": null,
+      "kdp_select_ebook": true,
+      "gesamtstatus": "live",
+      "hinweise": [],
+      "formate": [
+        {
+          "format": "Kindle eBook",
+          "status": "live",
+          "eingereicht_am": "2014-08-27",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 4.99,
+            "waehrung": "EUR"
+          },
+          "asin": "B00N3D7UMM"
+        },
+        {
+          "format": "Taschenbuch",
+          "status": "live",
+          "eingereicht_am": "2014-08-27",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 15.88,
+            "waehrung": "EUR"
+          },
+          "asin": "1497572983"
+        },
+        {
+          "format": "Gebundene Ausgabe",
+          "status": "nicht_eingerichtet",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": null,
+          "asin": null
+        }
+      ]
+    },
+    {
+      "titel": "To Catch A Dream: A Book of 100 Poems",
+      "autor": "Maximilian Warden",
+      "reihe": null,
+      "reihe_status": null,
+      "kdp_select_ebook": true,
+      "gesamtstatus": "live",
+      "hinweise": [],
+      "formate": [
+        {
+          "format": "Kindle eBook",
+          "status": "live",
+          "eingereicht_am": "2016-01-13",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 1.99,
+            "waehrung": "GBP"
+          },
+          "asin": "B01AJE3XYQ"
+        },
+        {
+          "format": "Taschenbuch",
+          "status": "live",
+          "eingereicht_am": "2015-09-05",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 10.27,
+            "waehrung": "EUR"
+          },
+          "asin": "1515100537"
+        },
+        {
+          "format": "Gebundene Ausgabe",
+          "status": "nicht_eingerichtet",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": null,
+          "asin": null
+        }
+      ]
+    },
+    {
+      "titel": "Ouroboros: Das Herz der Schöpfung",
+      "autor": "Maximilian Warden",
+      "reihe": null,
+      "reihe_status": null,
+      "kdp_select_ebook": true,
+      "gesamtstatus": "live",
+      "hinweise": [],
+      "formate": [
+        {
+          "format": "Kindle eBook",
+          "status": "live",
+          "eingereicht_am": "2016-04-06",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 4.99,
+            "waehrung": "EUR"
+          },
+          "asin": "B01DVG99N8"
+        },
+        {
+          "format": "Taschenbuch",
+          "status": "live",
+          "eingereicht_am": "2015-09-05",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 15.88,
+            "waehrung": "EUR"
+          },
+          "asin": "1515100979"
+        },
+        {
+          "format": "Gebundene Ausgabe",
+          "status": "nicht_eingerichtet",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": null,
+          "asin": null
+        }
+      ]
+    },
+    {
+      "titel": "Scriptis Verbis: Gleichgewicht",
+      "autor": "Maximilian Warden",
+      "reihe": null,
+      "reihe_status": null,
+      "kdp_select_ebook": true,
+      "gesamtstatus": "live",
+      "hinweise": [],
+      "formate": [
+        {
+          "format": "Kindle eBook",
+          "status": "live",
+          "eingereicht_am": "2016-07-24",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 4.99,
+            "waehrung": "EUR"
+          },
+          "asin": "B01J0GGSG4"
+        },
+        {
+          "format": "Taschenbuch",
+          "status": "live",
+          "eingereicht_am": "2017-06-27",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 14.01,
+            "waehrung": "EUR"
+          },
+          "asin": "1521580553"
+        },
+        {
+          "format": "Gebundene Ausgabe",
+          "status": "nicht_eingerichtet",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": null,
+          "asin": null
+        }
+      ]
+    },
+    {
+      "titel": "Der Fluss der Zeit: Gedichte und Balladen",
+      "autor": "Maximilian Warden",
+      "reihe": null,
+      "reihe_status": null,
+      "kdp_select_ebook": null,
+      "gesamtstatus": "live",
+      "hinweise": [
+        "Dieser Titel stammt aus dem nachgereichten Amazon-Produkttext und nicht aus dem KDP-Bücherregal-Ausschnitt.",
+        "ASINs wurden im bereitgestellten Ausschnitt nicht angezeigt."
+      ],
+      "verlagsdaten": {
+        "herausgeber": "TWENTYSIX",
+        "erscheinungstermin": "2018-06-07",
+        "seitenzahl_print": 528,
+        "sprache": "Deutsch",
+        "abmessungen_cm": "16 x 4.1 x 22.6",
+        "isbn_10": "3740747021",
+        "isbn_13": "978-3740747022"
+      },
+      "formate": [
+        {
+          "format": "Kindle eBook",
+          "status": "live",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 9.99,
+            "waehrung": "EUR"
+          },
+          "asin": null
+        },
+        {
+          "format": "Gebundene Ausgabe",
+          "status": "live",
+          "eingereicht_am": "2018-06-07",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 27.99,
+            "waehrung": "EUR"
+          },
+          "asin": null,
+          "isbn_10": "3740747021",
+          "isbn_13": "978-3740747022"
+        }
+      ]
+    },
+    {
+      "titel": "Sehr geehrter Herr Sensenmann: 10 Kurzgeschichten",
+      "autor": "Maximilian Warden",
+      "reihe": null,
+      "reihe_status": null,
+      "kdp_select_ebook": true,
+      "gesamtstatus": "live",
+      "hinweise": [],
+      "formate": [
+        {
+          "format": "Kindle eBook",
+          "status": "live",
+          "eingereicht_am": "2020-07-16",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 4.99,
+            "waehrung": "EUR"
+          },
+          "asin": "B08D5JWD3M"
+        },
+        {
+          "format": "Taschenbuch",
+          "status": "live",
+          "eingereicht_am": "2020-07-18",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 14.01,
+            "waehrung": "EUR"
+          },
+          "asin": "B08D4Y1QG4"
+        },
+        {
+          "format": "Gebundene Ausgabe",
+          "status": "nicht_eingerichtet",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": null,
+          "asin": null
+        }
+      ]
+    },
+    {
+      "titel": "The Fallen Monk",
+      "autor": "Maximilian Warden",
+      "reihe": null,
+      "reihe_status": null,
+      "kdp_select_ebook": true,
+      "gesamtstatus": "teilweise_live",
+      "hinweise": [],
+      "formate": [
+        {
+          "format": "Kindle eBook",
+          "status": "live",
+          "eingereicht_am": "2023-01-08",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 9.99,
+            "waehrung": "EUR"
+          },
+          "asin": "B0BRWNXR7R"
+        },
+        {
+          "format": "Taschenbuch",
+          "status": "live",
+          "eingereicht_am": "2023-01-11",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 14.94,
+            "waehrung": "EUR"
+          },
+          "asin": "B0BRZ68DSS"
+        },
+        {
+          "format": "Gebundene Ausgabe",
+          "status": "entwurf",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": "2023-01-05",
+          "preis": null,
+          "asin": null
+        }
+      ]
+    },
+    {
+      "titel": "Forgotten Memories",
+      "autor": "Maximilian Warden",
+      "reihe": null,
+      "reihe_status": null,
+      "kdp_select_ebook": true,
+      "gesamtstatus": "teilweise_live",
+      "hinweise": [],
+      "formate": [
+        {
+          "format": "Kindle eBook",
+          "status": "live",
+          "eingereicht_am": "2023-04-18",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 9.99,
+            "waehrung": "USD"
+          },
+          "asin": "B0C2WRXJT2"
+        },
+        {
+          "format": "Taschenbuch",
+          "status": "live",
+          "eingereicht_am": "2023-04-19",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 14.99,
+            "waehrung": "USD"
+          },
+          "asin": "B0C2S7LX2G"
+        },
+        {
+          "format": "Gebundene Ausgabe",
+          "status": "entwurf",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": "2023-04-18",
+          "preis": {
+            "betrag": 20.0,
+            "waehrung": "USD"
+          },
+          "asin": null
+        }
+      ]
+    },
+    {
+      "titel": "Der Mann aus Friesland: Eine Reise ins Glück: Die wahre Geschichte des Robert Zakkaloni und seiner Söhne",
+      "autor": "Maximilian Warden",
+      "reihe": null,
+      "reihe_status": null,
+      "kdp_select_ebook": true,
+      "gesamtstatus": "live",
+      "hinweise": [],
+      "formate": [
+        {
+          "format": "Kindle eBook",
+          "status": "live",
+          "eingereicht_am": "2023-05-02",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 9.99,
+            "waehrung": "EUR"
+          },
+          "asin": "B0C44199JL"
+        },
+        {
+          "format": "Taschenbuch",
+          "status": "live",
+          "eingereicht_am": "2023-05-03",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 14.01,
+            "waehrung": "EUR"
+          },
+          "asin": "3910833004"
+        },
+        {
+          "format": "Gebundene Ausgabe",
+          "status": "live",
+          "eingereicht_am": "2023-05-03",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 18.68,
+            "waehrung": "EUR"
+          },
+          "asin": "3910833012"
+        }
+      ]
+    },
+    {
+      "titel": "Buschige Brauen, Brüllende Abenteuer: Erichs komische Reise durch das Absurde und Außergewöhnliche",
+      "autor": "Maximilian Warden",
+      "reihe": "Erich Emil Anton Jürgens",
+      "reihe_status": "live",
+      "kdp_select_ebook": false,
+      "gesamtstatus": "live",
+      "hinweise": [],
+      "formate": [
+        {
+          "format": "Kindle eBook",
+          "status": "nicht_eingerichtet",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": null,
+          "asin": null
+        },
+        {
+          "format": "Taschenbuch",
+          "status": "nicht_eingerichtet",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": null,
+          "asin": null
+        },
+        {
+          "format": "Gebundene Ausgabe",
+          "status": "live",
+          "eingereicht_am": "2023-06-30",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 14.01,
+            "waehrung": "EUR"
+          },
+          "asin": "3910833020"
+        }
+      ]
+    },
+    {
+      "titel": "Erich Emil Anton Jürgens: Wie ich das Erikoso erfand!",
+      "autor": "Maximilian Warden",
+      "reihe": "Erich Emil Anton Jürgens",
+      "reihe_status": "live",
+      "kdp_select_ebook": false,
+      "gesamtstatus": "live",
+      "hinweise": [],
+      "formate": [
+        {
+          "format": "Kindle eBook",
+          "status": "nicht_eingerichtet",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": null,
+          "asin": null
+        },
+        {
+          "format": "Taschenbuch",
+          "status": "live",
+          "eingereicht_am": "2023-09-22",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 14.01,
+            "waehrung": "EUR"
+          },
+          "asin": "B0CJLR22FY"
+        },
+        {
+          "format": "Gebundene Ausgabe",
+          "status": "live",
+          "eingereicht_am": "2023-09-22",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 23.36,
+            "waehrung": "EUR"
+          },
+          "asin": "B0CJKY81S9"
+        }
+      ]
+    },
+    {
+      "titel": "De Bello Kargicano: Die Reise ins Land des Teufels",
+      "autor": "Maximilian Warden",
+      "reihe": null,
+      "reihe_status": null,
+      "kdp_select_ebook": false,
+      "gesamtstatus": "live",
+      "hinweise": [],
+      "formate": [
+        {
+          "format": "Kindle eBook",
+          "status": "nicht_eingerichtet",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": null,
+          "asin": null
+        },
+        {
+          "format": "Taschenbuch",
+          "status": "live",
+          "eingereicht_am": "2024-05-25",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 10.27,
+            "waehrung": "EUR"
+          },
+          "asin": "B0D56GRBRD"
+        },
+        {
+          "format": "Gebundene Ausgabe",
+          "status": "live",
+          "eingereicht_am": "2024-05-26",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 14.01,
+            "waehrung": "EUR"
+          },
+          "asin": "B0D5786LJD"
+        }
+      ]
+    },
+    {
+      "titel": "Der majestätische Mr. Jax: Ein Kater hebt ab",
+      "autor": "Maximilian Warden",
+      "reihe": null,
+      "reihe_status": null,
+      "kdp_select_ebook": false,
+      "gesamtstatus": "live",
+      "hinweise": [],
+      "formate": [
+        {
+          "format": "Kindle eBook",
+          "status": "nicht_eingerichtet",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": null,
+          "asin": null
+        },
+        {
+          "format": "Taschenbuch",
+          "status": "nicht_eingerichtet",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": null,
+          "asin": null
+        },
+        {
+          "format": "Gebundene Ausgabe",
+          "status": "live",
+          "eingereicht_am": "2024-05-30",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 23.36,
+            "waehrung": "EUR"
+          },
+          "asin": "B0D5NSZZRV"
+        }
+      ]
+    },
+    {
+      "titel": "Follow the Light",
+      "autor": "Maximilian Warden",
+      "reihe": null,
+      "reihe_status": null,
+      "kdp_select_ebook": false,
+      "gesamtstatus": "entwurf",
+      "hinweise": [],
+      "formate": [
+        {
+          "format": "Kindle eBook",
+          "status": "nicht_eingerichtet",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": null,
+          "asin": null
+        },
+        {
+          "format": "Taschenbuch",
+          "status": "nicht_eingerichtet",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": null,
+          "asin": null
+        },
+        {
+          "format": "Gebundene Ausgabe",
+          "status": "entwurf",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": "2024-10-07",
+          "preis": null,
+          "asin": null
+        }
+      ]
+    },
+    {
+      "titel": "Erich Emil Anton Jürgens: Die Erikoso-Renaissance",
+      "autor": "Maximilian Warden",
+      "reihe": "Erich Emil Anton Jürgens",
+      "reihe_status": "live",
+      "kdp_select_ebook": false,
+      "gesamtstatus": "live",
+      "hinweise": [
+        "Kein Cover hochgeladen"
+      ],
+      "formate": [
+        {
+          "format": "Kindle eBook",
+          "status": "nicht_eingerichtet",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": null,
+          "asin": null
+        },
+        {
+          "format": "Taschenbuch",
+          "status": "nicht_eingerichtet",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": null,
+          "asin": null
+        },
+        {
+          "format": "Gebundene Ausgabe",
+          "status": "live",
+          "eingereicht_am": "2025-06-09",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 14.95,
+            "waehrung": "EUR"
+          },
+          "asin": "B0FCFZVMDW"
+        }
+      ]
+    },
+    {
+      "titel": "Leo: Und das Jahr der falschen Fragen",
+      "autor": "Maximilian Warden",
+      "reihe": null,
+      "reihe_status": null,
+      "kdp_select_ebook": false,
+      "gesamtstatus": "live",
+      "hinweise": [],
+      "formate": [
+        {
+          "format": "Kindle eBook",
+          "status": "nicht_eingerichtet",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": null,
+          "asin": null
+        },
+        {
+          "format": "Taschenbuch",
+          "status": "nicht_eingerichtet",
+          "eingereicht_am": null,
+          "zuletzt_geaendert_am": null,
+          "preis": null,
+          "asin": null
+        },
+        {
+          "format": "Gebundene Ausgabe",
+          "status": "live",
+          "eingereicht_am": "2025-07-16",
+          "zuletzt_geaendert_am": null,
+          "preis": {
+            "betrag": 18.68,
+            "waehrung": "EUR"
+          },
+          "asin": "B0FHQTWTJY"
+        }
+      ]
+    }
+  ],
+  "anzahl_buecher": 16,
+  "anzahl_live": 13,
+  "anzahl_teilweise_live": 2,
+  "anzahl_entwuerfe": 1
+}
