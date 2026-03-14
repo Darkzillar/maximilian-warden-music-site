@@ -1300,6 +1300,13 @@ button:hover{opacity:.85}
         <span id="m-release-year">2024</span>
         <span id="m-release-format">Album</span>
       </div>
+      <a id="m-book-btn" href="./buecher/index.html" aria-label="Zur Bücher-Seite">
+        <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M2 4a2 2 0 0 1 2-2h5v14H4a2 2 0 0 1-2-2V4z"/>
+          <path d="M9 2h5a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9V2z"/>
+        </svg>
+        <span>Bücher</span>
+      </a>
       <button id="m-replay-btn" title="Animation wiederholen">↺</button>
     </div>
 
@@ -1496,6 +1503,42 @@ button:hover{opacity:.85}
   }
   #m-footer-links a { color: rgba(255,255,255,0.3); text-decoration: none; }
   #m-footer-links span { color: rgba(255,255,255,0.15); }
+
+  /* ---- Bücher Button Orbit Animation ---- */
+  @property --m-orbit {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+  }
+  @keyframes mOrbit { to { --m-orbit: 360deg; } }
+
+  #m-book-btn {
+    position: relative;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 11px 6px 8px;
+    border-radius: 999px;
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    font-family: var(--font-sans);
+    -webkit-tap-highlight-color: transparent;
+    flex-shrink: 0;
+  }
+  #m-book-btn::before {
+    content: '';
+    position: absolute; inset: -1.5px;
+    border-radius: 999px;
+    background: conic-gradient(from var(--m-orbit), transparent 60%, #f0a500 76%, #fff4c2 85%, #f0a500 92%, transparent 100%);
+    animation: mOrbit 2.2s linear infinite;
+  }
+  #m-book-btn::after {
+    content: '';
+    position: absolute; inset: 1px;
+    border-radius: 999px;
+    background: #0f1018;
+  }
+  #m-book-btn svg, #m-book-btn span { position: relative; z-index: 1; }
 </style>
 
 <script>
