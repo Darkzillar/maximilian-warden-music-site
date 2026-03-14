@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
@@ -548,17 +548,41 @@
     }
 
     @media (max-width: 720px) {
-      .section {
-        padding: 16px;
+      .main {
+        scroll-snap-type: none; /* Disable hard snapping on mobile */
       }
-      .hero-panel, .release-card {
-        border-radius: 24px;
+      .section {
+        padding: 0; /* Remove padding to allow edge-to-edge */
+      }
+      .hero-panel {
+        border-radius: 0;
+        min-height: 100svh; /* Full screen intro */
+        border: none;
+      }
+      .hero-video {
+        opacity: 0.25; /* Make slightly more visible on mobile */
+      }
+      .hero-copy {
+        bottom: 80px; /* Adjust copy position */
+        padding: 0 16px;
+      }
+      .release-card {
+        border-radius: 0;
+        border-inline: none;
+        padding: 24px 16px;
+        min-height: auto;
+        gap: 24px;
+      }
+      .cover-frame {
+        max-width: 320px;
+        position: relative; /* Release stickiness for scrolling */
       }
       .meta-grid {
         grid-template-columns: 1fr;
       }
       .release-title {
         max-width: none;
+        font-size: 32px;
       }
       .status-pill {
         left: 14px;
@@ -572,6 +596,12 @@
       }
       .btn {
         width: 100%;
+      }
+      .timeline {
+        display: none; /* Hide timeline sidebar overlay on mobile */
+      }
+      .legal-sidebar-btns {
+        display: none; /* Hide legal floating buttons on mobile (they are in the footer anyways) */
       }
     }
   
@@ -2068,8 +2098,15 @@ button:hover{opacity:.85}
       clearTimeout(animationTimer);
       animationPlayed = true;
       animationLock = false;
-      main.classList.remove("locked");
-      intro.classList.remove("playing");
+      
+      // On mobile, just hide the video panel completely after playback
+      if (window.innerWidth <= 720) {
+        document.querySelector('.hero-panel').style.display = 'none';
+        document.querySelector('.hero').style.display = 'none';
+      } else {
+        main.classList.remove("locked");
+        intro.classList.remove("playing");
+      }
       
       const heroCopy = document.getElementById("heroCopy");
       if (heroCopy) {
@@ -2086,7 +2123,10 @@ button:hover{opacity:.85}
       }
 
       animationLock = true;
-      main.classList.add("locked");
+      
+      if (window.innerWidth > 720) {
+        main.classList.add("locked");
+      }
       intro.classList.add("playing");
 
       const hasPlayableSource = scrollStopVideo.querySelector("source")?.getAttribute("src");
@@ -2128,8 +2168,22 @@ button:hover{opacity:.85}
           heroCopy.style.pointerEvents = "none";
         }
         
+        if (window.innerWidth <= 720) {
+          document.querySelector('.hero').style.display = 'flex';
+          document.querySelector('.hero-panel').style.display = 'grid';
+          // Jump to top so the video is visible again
+          window.scrollTo(0,0);
+        }
+        
         triggerScrollStop();
       });
+
+      // Also reset scroll position on mobile for fresh loads to guarantee the user sees the intro
+      if (window.innerWidth <= 720 && 'scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+        window.scrollTo(0,0);
+        main.scrollTop = 0;
+      }
 
       main.addEventListener("wheel", triggerFromInput, { passive: false });
       main.addEventListener("touchmove", triggerFromInput, { passive: false });
